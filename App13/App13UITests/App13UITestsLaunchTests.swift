@@ -1,13 +1,13 @@
 //
-//  Test14UITestsLaunchTests.swift
-//  Test14UITests
+//  App13UITestsLaunchTests.swift
+//  App13UITests
 //
-//  Created by Daniela Uribe on 1/09/24.
+//  Created by Daniela Uribe on 28/08/24.
 //
 
 import XCTest
 
-final class Test14UITestsLaunchTests: XCTestCase {
+final class App13UITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true
