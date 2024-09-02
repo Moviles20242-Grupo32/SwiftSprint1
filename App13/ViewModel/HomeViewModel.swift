@@ -1,0 +1,18 @@
+//
+//  HomeViewModel.swift
+//  App13
+//
+//  Created by Daniela Uribe on 28/08/24.
+//
+
+import SwiftUI
+
+struct HomeViewModel: View {
+    var body: some View {
+        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+    }
+}
+
+#Preview {
+    HomeViewModel()
+}
