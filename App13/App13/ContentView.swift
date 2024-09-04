@@ -8,15 +8,22 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var authViewModel: AuthViewModel
+    
     var body: some View {
-        NavigationView{
-            Home()
-                .navigationBarHidden(true)
-                .navigationBarBackButtonHidden(true)
+        Group {
+            if authViewModel.userSession != nil {
+                Home()
+                    .navigationBarHidden(true)
+                    .navigationBarBackButtonHidden(true)
+            }else {
+                LoginView()
+            }
         }
     }
 }
 
 #Preview {
     ContentView()
+        .environmentObject(AuthViewModel())
 }
