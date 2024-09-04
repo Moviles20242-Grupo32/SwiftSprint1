@@ -8,11 +8,17 @@
 import SwiftUI
 
 struct ProfileView: View {
+    
+    @EnvironmentObject var viewModel: AuthViewModel
     var body: some View {
+
+        if let user = viewModel.currentUser {
+
+        }
         List {
             Section {
                 HStack {
-                    Text("JA")
+                    Text("JA") //user.initials
                         .font(.title)
                         .fontWeight(.semibold)
                         .foregroundStyle(.white)
@@ -21,12 +27,12 @@ struct ProfileView: View {
                         .clipShape(Circle())
                     
                     VStack(alignment: .leading, spacing: 4){
-                        Text("Juan Andres")
+                        Text("Juan  And") //user.fullname
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .padding(.top, 4)
                         
-                        Text("example@gmail.com")
+                        Text("email@email.com") //user.email
                             .font(.footnote)
                             .accentColor(.gray)
                     }
@@ -55,9 +61,9 @@ struct ProfileView: View {
                 
                 VStack(alignment: .leading, spacing: 5){
                     
-                    Button{
+                    Button(action: {
                         print("Sign Out")
-                    } label: {
+                    }) {
                         HStack(spacing: 12){
                             Image(systemName: "arrow.left.circle.fill")
                                 .imageScale(.small)
@@ -73,9 +79,9 @@ struct ProfileView: View {
                     
                     Divider()
                     
-                    Button{
-                        print("Sign Out")
-                    } label: {
+                    Button(action: {
+                        print("Delete account")
+                    }){
                         HStack(spacing: 12){
                             Image(systemName: "xmark.circle.fill")
                                 .imageScale(.small)
@@ -88,12 +94,17 @@ struct ProfileView: View {
                         
                         }
                     }
+                    
                 }
+                .buttonStyle(PlainButtonStyle())
             }
         }
+        
+        
     }
 }
 
 #Preview {
     ProfileView()
+        .environmentObject(AuthViewModel())
 }

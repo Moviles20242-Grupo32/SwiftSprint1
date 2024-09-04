@@ -32,13 +32,31 @@ struct Menu: View {
             
             Spacer()
             
-            HStack{
-                Spacer()
-            }
-            .padding(10)
+//            NavigationLink(destination: {
+//                ProfileView()
+//            }, label: {
+//                HStack(spacing: 15){
+//                    Image(systemName: "person.crop.circle")
+//                        .font(.title)
+//                        .foregroundColor(.orange)
+//                    
+//                    Text("Mi Perfil")
+//                        .fontWeight(.bold)
+//                        .foregroundColor(.black)
+//                    
+//                    Spacer(minLength: /*@START_MENU_TOKEN@*/0/*@END_MENU_TOKEN@*/)
+//                }
+//                .padding()
+//            })
         }
         .frame(width: UIScreen.main.bounds.width/1.6)
         .background(Color.white.ignoresSafeArea())
+        
     }
+}
+
+
+#Preview {
+    Menu(homeData: HomeViewModel())
 }
 

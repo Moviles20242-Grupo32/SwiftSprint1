@@ -22,7 +22,7 @@ struct RegistrationView: View {
             Image("AppLogo")
                 .resizable()
                 .scaledToFill()
-                .frame(width: 150, height: 150)
+                .frame(width: 100, height: 100)
                 .padding(.vertical, 32)
             
             //form fields
