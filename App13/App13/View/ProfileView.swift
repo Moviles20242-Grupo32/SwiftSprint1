@@ -10,97 +10,111 @@ import SwiftUI
 struct ProfileView: View {
     
     @EnvironmentObject var viewModel: AuthViewModel
+    @State private var showPasswordPrompt: Bool = false
+    @State private var password = ""
     var body: some View {
-
-        if let user = viewModel.currentUser {
-
-        }
-        List {
-            Section {
-                HStack {
-                    Text("JA") //user.initials
-                        .font(.title)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.white)
-                        .frame(width: 72, height: 72)
-                        .background(Color(.systemGray3))
-                        .clipShape(Circle())
-                    
-                    VStack(alignment: .leading, spacing: 4){
-                        Text("Juan  And") //user.fullname
-                            .font(.subheadline)
+        
+        if true { //let user = viewModel.currentUser
+            List {
+                Section {
+                    HStack {
+                        Text("JA")//user.initials
+                            .font(.title)
                             .fontWeight(.semibold)
-                            .padding(.top, 4)
+                            .foregroundStyle(.white)
+                            .frame(width: 72, height: 72)
+                            .background(Color(.systemGray3))
+                            .clipShape(Circle())
                         
-                        Text("email@email.com") //user.email
-                            .font(.footnote)
-                            .accentColor(.gray)
-                    }
-                    
-                }
-            }
-            Section("General"){
-                HStack(spacing: 12){
-                    Image(systemName: "gear")
-                        .imageScale(.small)
-                        .font(.title)
-                        .foregroundColor(Color(.systemGray))
-                    
-                    Text("Version")
-                        .font(.subheadline)
-                        .foregroundStyle(.black)
-                
-                    Spacer()
-                    
-                    Text("1.0.0")
-                        .font(.subheadline)
-                        .foregroundStyle(.gray)
-                }
-            }
-            Section("Account"){
-                
-                VStack(alignment: .leading, spacing: 5){
-                    
-                    Button(action: {
-                        print("Sign Out")
-                    }) {
-                        HStack(spacing: 12){
-                            Image(systemName: "arrow.left.circle.fill")
-                                .imageScale(.small)
-                                .font(.title)
-                                .foregroundColor(Color(.systemRed))
-                            
-                            Text("Sign Out")
+                        VStack(alignment: .leading, spacing: 4){
+                            Text("JA") //user.fullname
                                 .font(.subheadline)
-                                .foregroundStyle(.black)
-                        
-                        }
-                    }
-                    
-                    Divider()
-                    
-                    Button(action: {
-                        print("Delete account")
-                    }){
-                        HStack(spacing: 12){
-                            Image(systemName: "xmark.circle.fill")
-                                .imageScale(.small)
-                                .font(.title)
-                                .foregroundColor(Color(.systemRed))
+                                .fontWeight(.semibold)
+                                .padding(.top, 4)
                             
-                            Text("Delete Account")
-                                .font(.subheadline)
-                                .foregroundStyle(.black)
-                        
+                            Text("a@u")//user.email
+                                .font(.footnote)
+                                .accentColor(.gray)
                         }
+                        
                     }
-                    
                 }
-                .buttonStyle(PlainButtonStyle())
+                Section("General"){
+                    HStack(spacing: 12){
+                        Image(systemName: "gear")
+                            .imageScale(.small)
+                            .font(.title)
+                            .foregroundColor(Color(.systemGray))
+                        
+                        Text("Version")
+                            .font(.subheadline)
+                            .foregroundStyle(.black)
+                        
+                        Spacer()
+                        
+                        Text("1.0.0")
+                            .font(.subheadline)
+                            .foregroundStyle(.gray)
+                    }
+                }
+                Section("Account"){
+                    
+                    VStack(alignment: .leading, spacing: 5){
+                        
+                        Button(action: {
+                            viewModel.signOut()
+                        }) {
+                            HStack(spacing: 12){
+                                Image(systemName: "arrow.left.circle.fill")
+                                    .imageScale(.small)
+                                    .font(.title)
+                                    .foregroundColor(Color(.systemRed))
+                                
+                                Text("Sign Out")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.black)
+                                
+                            }
+                        }
+                        
+                        Divider()
+                        
+                        Button(action: {
+                            print("Delete account")
+                            showPasswordPrompt = true
+                        }){
+                            HStack(spacing: 12){
+                                Image(systemName: "xmark.circle.fill")
+                                    .imageScale(.small)
+                                    .font(.title)
+                                    .foregroundColor(Color(.systemRed))
+                                
+                                Text("Delete Account")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.black)
+                                
+                            }
+                        }.alert(isPresented: $showPasswordPrompt) {
+                            Alert(
+                                title: Text("Re-enter Password"),
+                                message: Text("Please enter your password to confirm account deletion."),
+                                primaryButton: .destructive(Text("Delete")) {
+                                    viewModel.deleteAccount(password: password)
+                                },
+                                secondaryButton: .cancel()
+                            )
+                        }
+                        
+                        SecureField("Password", text: $password)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding()
+                            .disabled(!showPasswordPrompt) // Disable the field until the alert is shown
+                        
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
             }
         }
-        
-        
     }
 }
 

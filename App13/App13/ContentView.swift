@@ -18,6 +18,7 @@ struct ContentView: View {
                     .navigationBarBackButtonHidden(true)
             }else {
                 LoginView()
+                    .navigationBarBackButtonHidden(true)
             }
         }
     }
