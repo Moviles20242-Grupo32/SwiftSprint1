@@ -79,37 +79,49 @@ struct Home: View {
                 
                 Divider()
                 
-            
-                ScrollView(.vertical, showsIndicators: false, content: {
-                    VStack(spacing:25){
-                        ForEach(HomeModel.filtered){item in
-                            HStack{
-                                
-                                ItemView(item: item)
-                                    .padding(15)
-                                
-                                Spacer()
-                                    .frame(width: 10)
-                                
-                                Button(action: {
-                                    HomeModel.addToCart(item: item)
-                                }, label: {
-                                    Image(systemName: item.isAdded ? "checkmark" : "plus")
-                                        .resizable()  // Make the image resizable
-                                        .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
-                                        .frame(width: 10, height: 10)  // Set the width and height
-                                        .foregroundColor(.white)
-                                        .padding(10)
-                                        .background(item.isAdded ? Color.green : Color.orange)
-                                        .clipShape(Circle())
-                                })
+                if HomeModel.items.isEmpty{
+                    
+                    Spacer()
+                    
+                    ProgressView()
+                    
+                    Spacer()
+                    
+                }
+                else{
+                    ScrollView(.vertical, showsIndicators: false, content: {
+                        VStack(spacing:25){
+                            ForEach(HomeModel.filtered){item in
+                                HStack{
+                                    
+                                    ItemView(item: item)
+                                        .padding(15)
+                                    
+                                    Spacer()
+                                        .frame(width: 10)
+                                    
+                                    Button(action: {
+                                        HomeModel.addToCart(item: item)
+                                    }, label: {
+                                        Image(systemName: item.isAdded ? "checkmark" : "plus")
+                                            .resizable()  // Make the image resizable
+                                            .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
+                                            .frame(width: 10, height: 10)  // Set the width and height
+                                            .foregroundColor(.white)
+                                            .padding(10)
+                                            .background(item.isAdded ? Color.green : Color.orange)
+                                            .clipShape(Circle())
+                                    })
+                                }
+                                .padding(.trailing, 10)
+                                .padding(.top, 10)
                             }
-                            .padding(.trailing, 10)
-                            .padding(.top, 10)
                         }
-                    }
-                    .padding(.top, 10)
-                })
+                        .padding(.top, 10)
+                    })
+                }
+                
+            
             }
             
             HStack{
