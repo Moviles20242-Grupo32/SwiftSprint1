@@ -181,3 +181,8 @@ struct Home: View {
             synthesizer?.speak(speechUtterance)
         }
 }
+
+
+#Preview {
+    Home(HomeModel: HomeViewModel())
+}
