@@ -66,6 +66,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             address += ", "
             address += safeData.first?.locality ?? ""
             
+            print(address)
             self.userAdress = address
         }
     }
@@ -133,6 +134,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         }
         
         self.cartItems.append(Cart(item:item, quantity: 1))
+        print(self.cartItems)
         
     }
     

@@ -22,7 +22,7 @@ struct Home: View {
                         
                         // Carrito de compras
                         NavigationLink(destination: {
-                            CartView(homeData: HomeViewModel())
+                            CartView(homeData: HomeModel)
                         }, label: {
                             Image(systemName: "cart")
                                 .font(.title)
@@ -47,20 +47,8 @@ struct Home: View {
                                 .clipShape(Circle())
                             
                         }).padding(10)
-                        
-                        //Direccion domicilio
-                        Text(HomeModel.userLocation == nil ? "Localizando..." : "Dirección entrega")
-                            .foregroundColor(.black)
-                            .frame(width: 110)
-                        
-                        Text(HomeModel.userAdress)
-                            .font(.caption)
-                            .fontWeight(.heavy)
-                            .foregroundColor(Color(.orange))
-                        
-                        
-                        Spacer(minLength: 0)
-                        
+                
+
                         // Profile
                         NavigationLink(destination: {
                             ProfileView()
@@ -73,6 +61,27 @@ struct Home: View {
                         
                     }
                     .padding([.horizontal,.top])
+                    
+                    HStack{
+                        
+                        if HomeModel.userLocation == nil{
+                            Text("Localizando...")
+                                .foregroundColor(.black)
+                                .frame(width: 110)
+                        }
+                        else{
+                            Image(systemName: "location.fill")
+                                .font(.title2)
+                                .foregroundColor(.orange)
+                        }
+                     
+                        
+                        Text(HomeModel.userAdress)
+                            .font(.caption)
+                            .fontWeight(.heavy)
+                            .foregroundColor(Color(.orange))
+                        
+                    }
                     
                     Divider()
                     

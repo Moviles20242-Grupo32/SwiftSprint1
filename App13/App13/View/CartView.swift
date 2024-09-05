@@ -14,6 +14,7 @@ struct CartView: View {
     @Environment(\.presentationMode) var present
     var body: some View {
         VStack{
+            
             HStack(spacing: 20){
                 Button(action: {present.wrappedValue.dismiss()}){
                     Image(systemName: "chevron.left")
