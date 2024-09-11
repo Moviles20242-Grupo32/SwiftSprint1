@@ -53,7 +53,7 @@ struct LoginView: View {
                     .foregroundColor(.white)
                     .frame(width: UIScreen.main.bounds.width - 32,          height: 48)
                 }
-                .background(Color(.systemBlue))
+                .background(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
                 .disabled(!FormIsValid)
                 .opacity(FormIsValid ? 1.0 : 0.5)
                 .cornerRadius(10)
@@ -67,8 +67,10 @@ struct LoginView: View {
                 }, label: {
                     HStack {
                         Text("Don't have an account?")
+                            .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                         Text("Sign Up")
                             .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                            .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                     }
                     .font(.system(size: 16))
                 })
