@@ -7,137 +7,193 @@
 
 import SwiftUI
 import AVFoundation
+import Combine
+import FirebaseAnalytics
 
 struct Home: View {
     @State private var synthesizer: AVSpeechSynthesizer?
     @StateObject var HomeModel = HomeViewModel()
+    @State private var searchDebounceTimer: AnyCancellable?
     
     var body: some View {
         
-        ZStack{
-            VStack(spacing:10){
-                
-                HStack(spacing:15){
+        NavigationView{
+            ZStack(alignment: .leading){
+                VStack(spacing:10){
                     
-                    Button(action: {
-                        withAnimation(.easeIn){
-                            HomeModel.showMenu.toggle()
-                        }
-                    }, label: {
-                        Image(systemName: "line.horizontal.3")
-                            .font(.title)
-                            .foregroundColor(Color(.orange))
-                    })
-                    
-                    Button(action:{
+                    HStack(spacing:15){
                         
-                        var elementsString: String {
+                        // Carrito de compras
+                        NavigationLink(destination: {
+                            CartView(homeData: HomeModel)
+                        }, label: {
+                            Image(systemName: "cart")
+                                .font(.title)
+                                .foregroundColor(Color(.orange))
+                        })
+                        .padding(10)
+                        
+                        // Text to Speach
+                        Button(action:{
+                            var elementsString: String {
                                 HomeModel.filtered.map { $0.item_name }.joined(separator: " ")
                             }
-                    
-                        speak(elements: " " + elementsString)
-                        
+                            speak(elements: " " + elementsString)
                         },
-                        label: {
-                        Image(systemName: "megaphone")
-                            .resizable()
-                            .foregroundColor(.white)
-                            .frame(width: 15, height: 15)
-                            .padding(15)
-                            .background(Color.orange)
-                            .clipShape(Circle())
+                               label: {
+                            Image(systemName: "megaphone")
+                                .resizable()
+                                .foregroundColor(.white)
+                                .frame(width: 20, height: 20)
+                                .padding(13)
+                                .background(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                                .clipShape(Circle())
                             
-                    }).padding(20)
-                    
-                    Text(HomeModel.userLocation == nil ? "Localizando..." : "Dirección entrega")
-                        .foregroundColor(.black)
-                    
-                    Text(HomeModel.userAdress)
-                        .font(.caption)
-                        .fontWeight(.heavy)
-                        .foregroundColor(Color(.orange))
-                    
-                    
-                    Spacer(minLength: /*@START_MENU_TOKEN@*/0/*@END_MENU_TOKEN@*/)
-                    
-                }
-                .padding([.horizontal,.top])
+                        }).padding(10)
                 
-                Divider()
-                
-                HStack(spacing: 15){
-                    
-                    Image(systemName: "magnifyingglass")
-                        .font(.title2)
-                        .foregroundColor(.gray)
-                    
-                    TextField("Buscar", text: $HomeModel.search)
-    
-                }
-                .padding(.horizontal)
-                .padding(.top,10)
-                
-                Divider()
-                
-            
-                ScrollView(.vertical, showsIndicators: false, content: {
-                    VStack(spacing:25){
-                        ForEach(HomeModel.filtered){item in
-                            HStack{
-                                
-                                ItemView(item: item)
-                                    .padding(15)
-                                
-                                Spacer()
-                                    .frame(width: 10)
-                                
-                                Button(action: {
-                                    HomeModel.addToCart(item: item)
-                                }, label: {
-                                    Image(systemName: item.isAdded ? "checkmark" : "plus")
-                                        .resizable()  // Make the image resizable
-                                        .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
-                                        .frame(width: 10, height: 10)  // Set the width and height
-                                        .foregroundColor(.white)
-                                        .padding(10)
-                                        .background(item.isAdded ? Color.green : Color.orange)
-                                        .clipShape(Circle())
-                                })
-                            }
-                            .padding(.trailing, 10)
-                            .padding(.top, 10)
-                        }
+
+                        // Profile
+                        NavigationLink(destination: {
+                            ProfileView()
+                        }, label: {
+                            Image(systemName: "person.crop.circle")
+                                .font(.largeTitle)
+                                .foregroundColor(.orange)
+                            
+                        }).padding(10)
+                        
                     }
-                    .padding(.top, 10)
-                })
-            }
-            
-            HStack{
-                Menu(homeData: HomeModel)
-                    .offset(x: HomeModel.showMenu ? 0: -UIScreen.main.bounds.width/1.6)
-                Spacer(minLength: 0)
-            }
-            .background(Color.black.opacity(HomeModel.showMenu ? 0.3: 0).ignoresSafeArea())
-            .onTapGesture(perform: {
-                withAnimation(.easeIn){
-                    HomeModel.showMenu.toggle()
+                    .padding([.horizontal,.top])
+                    
+                    HStack{
+                        
+                        if HomeModel.userLocation == nil{
+                            Text("Localizando...")
+                                .foregroundColor(.black)
+                                .frame(width: 110)
+                        }
+                        else{
+                            Image(systemName: "location.fill")
+                                .font(.title2)
+                                .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                        }
+                     
+                        
+                        Text(HomeModel.userAdress)
+                            .font(.caption)
+                            .fontWeight(.heavy)
+                            .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                        
+                    }
+                    
+                    
+                    
+                    HStack(spacing: 15){
+                        
+                        Image(systemName: "magnifyingglass")
+                            .font(.title2)
+                            .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                        
+                        TextField("", text: $HomeModel.search)
+                            .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                            .padding(.vertical, 10)
+                            .onChange(of: HomeModel.search) { newValue in
+                                // Cancel any previous debounce timers
+                                // Cancel any previous debounce timer
+                                searchDebounceTimer?.cancel()
+
+                                // Start a new debounce timer
+                                searchDebounceTimer = Just(newValue)
+                                    .delay(for: .seconds(0.8), scheduler: RunLoop.main)
+                                    .sink { finalValue in
+                                        if !finalValue.isEmpty {
+                                            // Log the event after 0.8 seconds of inactivity
+                                            Analytics.logEvent("search_completed", parameters: [
+                                                "search_term": finalValue
+                                            ])
+                                            print("Event logged: search_term = \(finalValue)")
+                                        }
+                                    }
+                            }
+                        
+                            
+                    }
+                    .padding(.horizontal)
+                    .background(
+                                RoundedRectangle(cornerRadius: 10) // Adjust corner radius as needed
+                                    .fill(Color.white) // Background color of the rectangle
+                                    .shadow(color: Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0), radius: 5, x: 0, y: 2) // Shadow parameters
+                                        )
+                    .padding(.horizontal, 20)
+                    .padding(.top,10)
+                    
+                   
+                    
+                    if HomeModel.items.isEmpty{
+                        
+                        Spacer()
+                        
+                        ProgressView()
+                        
+                        Spacer()
+                        
+                    }
+                    else{
+                        ScrollView(.vertical, showsIndicators: false, content: {
+                            VStack(spacing:25){
+                                ForEach(HomeModel.filtered){item in
+                                    HStack{
+                                        
+                                        ItemView(item: item)
+                                            .padding(15)
+                                        
+                                        Spacer()
+                                            .frame(width: 10)
+                                        
+                                        Button(action: {
+                                            HomeModel.addToCart(item: item)
+                                        }, label: {
+                                            Image(systemName: item.isAdded ? "checkmark" : "plus")
+                                                .resizable()  // Make the image resizable
+                                                .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
+                                                .frame(width: 10, height: 10)  // Set the width and height
+                                                .foregroundColor(.white)
+                                                .padding(10)
+                                                .background(item.isAdded ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                                                .clipShape(Circle())
+                                        })
+                                    }
+                                    .padding(.trailing, 10)
+                                    .padding(.top, 10)
+                                }
+                            }
+                            .padding(.top, 10)
+                        })
+                    }
+                    
+                    
                 }
-            })
-            
-            if HomeModel.noLocation{
-                Text("Por favor active el acceso a su ubicación en configuración para continuar !!!")
-                    .foregroundColor(.black)
-                    .frame(width: UIScreen.main.bounds.width - 100, height: 120)
-                    .cornerRadius(10)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.black.opacity(0.3).ignoresSafeArea())
+                
+                if HomeModel.noLocation{
+                    Text("Por favor active el acceso a su ubicación en configuración para continuar !!!")
+                        .foregroundColor(.black)
+                        .frame(width: UIScreen.main.bounds.width - 100, height: 120)
+                        .cornerRadius(10)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.black.opacity(0.3).ignoresSafeArea())
+                    
+                    
+                }
             }
         }
+        .navigationBarHidden(true)
+        .edgesIgnoringSafeArea(.top)
+        
         .onAppear(perform: {
             HomeModel.locationManager.delegate = HomeModel
         })
         .onChange(of: HomeModel.search, perform:{ value in
-                
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3){
                 
                 if value == HomeModel.search && HomeModel.search != ""{
@@ -152,20 +208,26 @@ struct Home: View {
     }
     
     func speak(elements: String) {
-            
-            let audioSession = AVAudioSession() // 2) handle audio session first, before trying to read the text
-            do {
-                try audioSession.setCategory(.playback, mode: .default, options: .duckOthers)
-                try audioSession.setActive(false)
-            } catch let error {
-                print("❓", error.localizedDescription)
-            }
-            
-            synthesizer = AVSpeechSynthesizer()
-            
-            let speechUtterance = AVSpeechUtterance(string: "Las cajas disponibles son " + elements)
-            speechUtterance.voice = AVSpeechSynthesisVoice(language: "es-MX")
-            
-            synthesizer?.speak(speechUtterance)
+        
+        let audioSession = AVAudioSession() // 2) handle audio session first, before trying to read the text
+        do {
+            try audioSession.setCategory(.playback, mode: .default, options: .duckOthers)
+            try audioSession.setActive(false)
+        } catch let error {
+            print("❓", error.localizedDescription)
         }
+        
+        synthesizer = AVSpeechSynthesizer()
+        
+        let speechUtterance = AVSpeechUtterance(string: "Las cajas disponibles son " + elements)
+        speechUtterance.voice = AVSpeechSynthesisVoice(language: "es-MX")
+        
+        synthesizer?.speak(speechUtterance)
+    }
+}
+
+
+#Preview {
+    Home(HomeModel: HomeViewModel())
+        .environmentObject(AuthViewModel())
 }
