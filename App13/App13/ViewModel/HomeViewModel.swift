@@ -9,6 +9,7 @@ import SwiftUI
 import CoreLocation
 import Firebase
 import FirebaseAuth
+import Foundation
 
 class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
@@ -29,6 +30,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     @Published var cartItems: [Cart] = []
     @Published var ordered = false
+
+    @Published var db = FirestoreManager.shared.db
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch manager.authorizationStatus {
@@ -88,7 +91,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     }
     
     func fetchData(){
-        let db = Firestore.firestore()
+        
         
         db.collection("Items").getDocuments{ (snap, err) in
             
@@ -170,7 +173,6 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     }
     
     func updateOrder(){
-        let db = Firestore.firestore()
         
         if ordered{
             ordered = false
@@ -198,7 +200,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         }
 
         ordered = true
-        db.collection("Users").document(Auth.auth().currentUser!.uid).setData([
+        db.collection("Orders").document(Auth.auth().currentUser!.uid).setData([
             
             "ordered_food": details,
             "total_cost": calculateTotalPrice(),

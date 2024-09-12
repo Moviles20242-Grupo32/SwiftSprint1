@@ -13,6 +13,7 @@
 		724AD1C72C8958490042459F /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 724AD1C62C8958490042459F /* FirebaseCrashlytics */; };
 		724AD1C92C8958490042459F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 724AD1C82C8958490042459F /* FirebaseFirestore */; };
 		724AD1CB2C8958E30042459F /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 724AD1CA2C8958E30042459F /* SDWebImageSwiftUI */; };
+		72CD64412C9280DC000AFB57 /* FirestoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72CD64402C9280DC000AFB57 /* FirestoreManager.swift */; };
 		72D37E902C7FF8EE00F51B8D /* App13App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D37E8F2C7FF8EE00F51B8D /* App13App.swift */; };
 		72D37E922C7FF8EE00F51B8D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D37E912C7FF8EE00F51B8D /* ContentView.swift */; };
 		72D37E942C7FF8F000F51B8D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D37E932C7FF8F000F51B8D /* Assets.xcassets */; };
@@ -57,6 +58,7 @@
 
 /* Begin PBXFileReference section */
 		724AD1C02C8954B80042459F /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		72CD64402C9280DC000AFB57 /* FirestoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreManager.swift; sourceTree = "<group>"; };
 		72D37E8C2C7FF8EE00F51B8D /* App13.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App13.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D37E8F2C7FF8EE00F51B8D /* App13App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App13App.swift; sourceTree = "<group>"; };
 		72D37E912C7FF8EE00F51B8D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -196,6 +198,7 @@
 				72D37EDE2C81200E00F51B8D /* Item.swift */,
 				72EBC5482C8643340086C7C6 /* Cart.swift */,
 				A084B79B2C87925500E9D966 /* User.swift */,
+				72CD64402C9280DC000AFB57 /* FirestoreManager.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -396,6 +399,7 @@
 				A084B7952C876DA200E9D966 /* LoginView.swift in Sources */,
 				A084B79E2C87B56000E9D966 /* ProfileView.swift in Sources */,
 				72EBC5492C8643340086C7C6 /* Cart.swift in Sources */,
+				72CD64412C9280DC000AFB57 /* FirestoreManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
