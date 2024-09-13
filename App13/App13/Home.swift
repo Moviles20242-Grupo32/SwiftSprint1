@@ -7,10 +7,13 @@
 
 import SwiftUI
 import AVFoundation
+import Combine
+import FirebaseAnalytics
 
 struct Home: View {
     @State private var synthesizer: AVSpeechSynthesizer?
     @StateObject var HomeModel = HomeViewModel()
+    @State private var searchDebounceTimer: AnyCancellable?
     
     var body: some View {
         
@@ -43,7 +46,7 @@ struct Home: View {
                                 .foregroundColor(.white)
                                 .frame(width: 20, height: 20)
                                 .padding(13)
-                                .background(Color(.orange))
+                                .background(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
                                 .clipShape(Circle())
                             
                         }).padding(10)
@@ -72,32 +75,59 @@ struct Home: View {
                         else{
                             Image(systemName: "location.fill")
                                 .font(.title2)
-                                .foregroundColor(.orange)
+                                .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
                         }
                      
                         
                         Text(HomeModel.userAdress)
                             .font(.caption)
                             .fontWeight(.heavy)
-                            .foregroundColor(Color(.orange))
+                            .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
                         
                     }
                     
-                    Divider()
+                    
                     
                     HStack(spacing: 15){
                         
                         Image(systemName: "magnifyingglass")
                             .font(.title2)
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
                         
-                        TextField("Buscar", text: $HomeModel.search)
+                        TextField("", text: $HomeModel.search)
+                            .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                            .padding(.vertical, 10)
+                            .onChange(of: HomeModel.search) { newValue in
+                                // Cancel any previous debounce timers
+                                // Cancel any previous debounce timer
+                                searchDebounceTimer?.cancel()
+
+                                // Start a new debounce timer
+                                searchDebounceTimer = Just(newValue)
+                                    .delay(for: .seconds(0.8), scheduler: RunLoop.main)
+                                    .sink { finalValue in
+                                        if !finalValue.isEmpty {
+                                            // Log the event after 0.8 seconds of inactivity
+                                            Analytics.logEvent("search_completed", parameters: [
+                                                "search_term": finalValue
+                                            ])
+                                            print("Event logged: search_term = \(finalValue)")
+                                        }
+                                    }
+                            }
                         
+                            
                     }
                     .padding(.horizontal)
+                    .background(
+                                RoundedRectangle(cornerRadius: 10) // Adjust corner radius as needed
+                                    .fill(Color.white) // Background color of the rectangle
+                                    .shadow(color: Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0), radius: 5, x: 0, y: 2) // Shadow parameters
+                                        )
+                    .padding(.horizontal, 20)
                     .padding(.top,10)
                     
-                    Divider()
+                   
                     
                     if HomeModel.items.isEmpty{
                         
@@ -129,7 +159,7 @@ struct Home: View {
                                                 .frame(width: 10, height: 10)  // Set the width and height
                                                 .foregroundColor(.white)
                                                 .padding(10)
-                                                .background(item.isAdded ? Color.green : Color.orange)
+                                                .background(item.isAdded ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
                                                 .clipShape(Circle())
                                         })
                                     }

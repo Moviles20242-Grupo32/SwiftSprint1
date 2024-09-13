@@ -25,7 +25,7 @@ struct CartView: View {
                 Text("Carrito")
                     .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
                     .fontWeight(.heavy)
-                    .foregroundColor(.black)
+                    .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                 
                 Spacer()
             }
@@ -45,18 +45,18 @@ struct CartView: View {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text(cart.item.item_name)
                                     .fontWeight(.semibold)
-                                    .foregroundColor(.black)
+                                    .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                                 
                                 Text(cart.item.item_details)
                                     .fontWeight(.semibold)
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
                                     .lineLimit(2)
                                 
                                 HStack(spacing: 10){
                                     Text(homeData.getPrice(value: Float(truncating: cart.item.item_cost)))
                                         .font(.title2)
                                         .fontWeight(.heavy)
-                                        .foregroundColor(.black)
+                                        .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                                     
                                     Spacer(minLength: 0)
                                     
@@ -65,15 +65,15 @@ struct CartView: View {
                                     }){
                                         Image(systemName: "minus")
                                             .font(.system(size: 16, weight: .heavy))
-                                            .foregroundColor(.black)
+                                            .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                                     }
                                     
                                     Text("\(cart.quantity)")
                                         .fontWeight(.heavy)
-                                        .foregroundColor(.black)
+                                        .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
                                         .padding(.vertical, 5)
                                         .padding(.horizontal,10)
-                                        .background(Color.black.opacity(0.06))
+                                        .background(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0).opacity(0.06))
                                     
                                     Button(action: {
                                         homeData.cartItems[homeData.getIndex(item: cart.item, isCartIndex: true)].quantity += 1
@@ -81,7 +81,7 @@ struct CartView: View {
                                                 
                                         Image(systemName: "plus")
                                             .font(.system(size: 16,weight: .heavy))
-                                            .foregroundColor(.black)
+                                            .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                                     }
                                 }
 
@@ -100,6 +100,7 @@ struct CartView: View {
                                 homeData.cartItems.remove(at: index)
                             }){
                                 Text("Remove")
+                                    .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255))
                             }
                             
                         }
@@ -113,14 +114,14 @@ struct CartView: View {
                 HStack{
                     Text("Total")
                         .fontWeight(.heavy)
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                     
                     Spacer()
                     
                     Text(homeData.calculateTotalPrice())
                         .font(.title)
                         .fontWeight(.heavy)
-                        .foregroundColor(.black)
+                        .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                 }
                 .padding([.top,.horizontal])
                 
@@ -133,7 +134,7 @@ struct CartView: View {
                         .padding(.vertical)
                         .frame(width: UIScreen.main.bounds.width - 30)
                         .background(
-                            Color.brown
+                            Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0)
                         )
                         .cornerRadius(15)
                 }
