@@ -105,6 +105,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                 let ratings = doc.get("item_ratings") as! String
                 let image = doc.get("item_image") as! String
                 let details = doc.get("item_details") as! String
+//                let times = doc.get("times_ordered") as! Int
                 
                 return Item(id: id, item_name: name, item_cost: cost, item_details: details, item_image: image, item_ratings: ratings)
             }

@@ -99,7 +99,7 @@ struct CartView: View {
                                 
                                 homeData.cartItems.remove(at: index)
                             }){
-                                Text("Remove")
+                                Text("Eliminar")
                                     .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255))
                             }
                             
@@ -127,7 +127,7 @@ struct CartView: View {
                 
                 Button(action: homeData.updateOrder){
                     
-                    Text(homeData.ordered ? "Cancel Order": "Check out")
+                    Text(homeData.ordered ? "Cancelar Orden": "Check out")
                         .font(.title2)
                         .fontWeight(.heavy)
                         .foregroundColor(.white)
