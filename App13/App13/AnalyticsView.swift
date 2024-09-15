@@ -5,26 +5,26 @@
 //  Created by Daniela Uribe on 9/09/24.
 //
 
-import SwiftUI
-import FirebaseAnalytics
-
-final class AnalyticsManager{
-    
-    static let shared = AnalyticsManager()
-    private init(){}
-        
-        func logEvent(name: String, params: [String:Any]?=nil){
-            Analytics.logEvent(name, parameters: params)
-        }
-        
-        func setUserId(userId: String){
-            Analytics.setUserID(userId)
-        }
-        
-        func setUserProperty(value: String?, property:String){
-            Analytics.setUserProperty(value, forName: property)
-        }
-}
+//import SwiftUI
+//import FirebaseAnalytics
+//
+//final class AnalyticsManager{
+//    
+//    static let shared = AnalyticsManager()
+//    private init(){}
+//        
+//        func logEvent(name: String, params: [String:Any]?=nil){
+//            Analytics.logEvent(name, parameters: params)
+//        }
+//        
+//        func setUserId(userId: String){
+//            Analytics.setUserID(userId)
+//        }
+//        
+//        func setUserProperty(value: String?, property:String){
+//            Analytics.setUserProperty(value, forName: property)
+//        }
+//}
 
 //struct AnalyticsView: View {
 //    var body: some View {
