@@ -27,6 +27,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     //ItemData
     @Published var items: [Item] = []
     @Published var filtered: [Item] = []
+    @Published var favorite: Item? = nil
     
     @Published var cartItems: [Cart] = []
     @Published var ordered = false
@@ -98,6 +99,12 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                 if let items = items {
                     self?.items = items
                     self?.filtered = items
+                    // Assign the most ordered item to the 'favorite' variable using the 'getFavorite' function
+                    if let favoriteItem = self?.getFavorite() {
+                        self?.favorite = favoriteItem
+                    } else {
+                        print("No favorite item found.")
+                    }
                 }
             }
     }
@@ -180,6 +187,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             }
             
             var details: [[String: Any]] = []
+            var items_ids: [[String: Any]] = []
             
             cartItems.forEach { cart in
                 details.append([
@@ -187,12 +195,17 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                     "item_quantity": cart.quantity,
                     "item_cost": cart.item.item_cost
                 ])
+                
+                items_ids.append([
+                    "id":cart.item.id,
+                    "num":cart.quantity
+                ])
             }
             
             ordered = true
             
             // Call DatabaseManager to set the order
-            DatabaseManager.shared.setOrder(for: userId, details: details, totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)) { [weak self] error in
+        DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)) { [weak self] error in
                 if let error = error {
                     print("Error setting order: \(error)")
                     self?.ordered = false
@@ -200,10 +213,16 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             }
         }
         
-        func calculateTotalPrice() -> NSNumber {
-            // Assuming there's logic here to calculate total price
-            return cartItems.reduce(0) { $0 + $1.item.item_cost.floatValue * Float($1.quantity) } as NSNumber
-        }
+    func calculateTotalPrice() -> NSNumber {
+        // Assuming there's logic here to calculate total price
+        return cartItems.reduce(0) { $0 + $1.item.item_cost.floatValue * Float($1.quantity) } as NSNumber
+    }
+    
+    func getFavorite() -> Item? {
+        return items.max(by: { $0.times_ordered < $1.times_ordered })
+    }
+        
+        
 
     
 }

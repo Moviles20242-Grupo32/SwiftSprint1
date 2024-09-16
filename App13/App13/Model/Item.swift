@@ -16,6 +16,6 @@ struct Item: Identifiable {
     var item_image: String
     var item_ratings: String
     var isAdded: Bool = false
-//    var times_ordered: Int
+    var times_ordered: Int
 }
 
