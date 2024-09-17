@@ -31,6 +31,8 @@
 		72F4ABC02C8F2FAC0062ACDB /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 72F4ABBF2C8F2FAC0062ACDB /* FirebaseAnalyticsWithoutAdIdSupport */; };
 		72F4ABC22C8F2FC60062ACDB /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 72F4ABC12C8F2FC60062ACDB /* AdSupport.framework */; };
 		72F4ABC42C8F2FDF0062ACDB /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F4ABC32C8F2FDF0062ACDB /* AnalyticsView.swift */; };
+		A03C20E52C98BFCF00B933D6 /* LocationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03C20E42C98BFCF00B933D6 /* LocationViewModel.swift */; };
+		A03C20E72C98C05A00B933D6 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03C20E62C98C05A00B933D6 /* LocationManager.swift */; };
 		A084B7952C876DA200E9D966 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A084B7942C876DA200E9D966 /* LoginView.swift */; };
 		A084B7982C877A4F00E9D966 /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A084B7972C877A4F00E9D966 /* InputView.swift */; };
 		A084B79A2C878C2700E9D966 /* RegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A084B7992C878C2700E9D966 /* RegistrationView.swift */; };
@@ -78,6 +80,8 @@
 		72EBC54A2C8646EE0086C7C6 /* CartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartView.swift; sourceTree = "<group>"; };
 		72F4ABC12C8F2FC60062ACDB /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = System/Library/Frameworks/AdSupport.framework; sourceTree = SDKROOT; };
 		72F4ABC32C8F2FDF0062ACDB /* AnalyticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsView.swift; sourceTree = "<group>"; };
+		A03C20E42C98BFCF00B933D6 /* LocationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationViewModel.swift; sourceTree = "<group>"; };
+		A03C20E62C98C05A00B933D6 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		A084B7942C876DA200E9D966 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A084B7972C877A4F00E9D966 /* InputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
 		A084B7992C878C2700E9D966 /* RegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationView.swift; sourceTree = "<group>"; };
@@ -188,6 +192,7 @@
 			children = (
 				72D37EC52C7FFDFE00F51B8D /* HomeViewModel.swift */,
 				A084B79F2C87C3DB00E9D966 /* AuthViewModel.swift */,
+				A03C20E42C98BFCF00B933D6 /* LocationViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -199,6 +204,7 @@
 				72EBC5482C8643340086C7C6 /* Cart.swift */,
 				A084B79B2C87925500E9D966 /* User.swift */,
 				72CD64402C9280DC000AFB57 /* FirestoreManager.swift */,
+				A03C20E62C98C05A00B933D6 /* LocationManager.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -392,6 +398,8 @@
 				A084B79A2C878C2700E9D966 /* RegistrationView.swift in Sources */,
 				A084B7A02C87C3DB00E9D966 /* AuthViewModel.swift in Sources */,
 				72D37E902C7FF8EE00F51B8D /* App13App.swift in Sources */,
+				A03C20E72C98C05A00B933D6 /* LocationManager.swift in Sources */,
+				A03C20E52C98BFCF00B933D6 /* LocationViewModel.swift in Sources */,
 				72D37EC62C7FFDFE00F51B8D /* HomeViewModel.swift in Sources */,
 				72D37EE12C815B0400F51B8D /* ItemView.swift in Sources */,
 				72D37EDF2C81200E00F51B8D /* Item.swift in Sources */,
@@ -563,11 +571,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"App13/Preview Content\"";
-				DEVELOPMENT_TEAM = Z7525NFV76;
+				DEVELOPMENT_TEAM = X65KHTY6U7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = App13/Info.plist;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Please allow to read location for delivery";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Nesesitamos tu ubicación para notificarte incluso cuando la app esté ejecutándose en el fondo!";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Nesesitamos tu ubicación para notificarte cuando estas cerca de algún restaurante con servicio!";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -594,11 +603,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"App13/Preview Content\"";
-				DEVELOPMENT_TEAM = Z7525NFV76;
+				DEVELOPMENT_TEAM = X65KHTY6U7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = App13/Info.plist;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Please allow to read location for delivery";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Nesesitamos tu ubicación para notificarte incluso cuando la app esté ejecutándose en el fondo!";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Nesesitamos tu ubicación para notificarte cuando estas cerca de algún restaurante con servicio!";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

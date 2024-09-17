@@ -18,6 +18,7 @@ protocol AuthenticationFormProtocol {
 class AuthViewModel: ObservableObject {
     @Published var userSession: FirebaseAuth.User?
     @Published var currentUser: User?
+    @Published var incorrectUserPassword: Bool = false
     
     init(){
         self.userSession = Auth.auth().currentUser
@@ -34,6 +35,9 @@ class AuthViewModel: ObservableObject {
             await fetchUser()
         }catch{
             print("DEBUG: Failed to log in with error: \(error.localizedDescription)")
+            if error.localizedDescription == "The supplied auth credential is malformed or has expired."{
+                incorrectUserPassword = true
+            }
         }
     }
     
@@ -58,38 +62,6 @@ class AuthViewModel: ObservableObject {
         } catch{
             print("DEBUG: Failed to sign out with error \(error.localizedDescription)")
         }
-    }
-    
-    func deleteAccount(password: String){
-//        guard let user = Auth.auth().currentUser else {
-//                    print("DEBUG: No user is currently signed in.")
-//                    return
-//                }
-//
-//        let credential = EmailAuthProvider.credential(withEmail: user.email!, password: password)
-//
-//                user.reauthenticate(with: credential) { result, error in
-//                    if let error = error {
-//                        print("DEBUG: Failed to re-authenticate with error \(error.localizedDescription)")
-//                        return
-//                    }
-//
-//                    user.delete { error in
-//                        if let error = error {
-//                            print("DEBUG: Failed to delete account with error \(error.localizedDescription)")
-//                            return
-//                        }
-//
-//                        print("DEBUG: Account deleted successfully.")
-//                        // Sign out the user and clear session
-//                        do {
-//                            try Auth.auth().signOut()
-//                            // Perform any additional clean-up, such as navigating away from the view
-//                        } catch {
-//                            print("DEBUG: Failed to sign out after account deletion with error \(error.localizedDescription)")
-//                        }
-//                    }
-//                }
     }
     
     func fetchUser() async{

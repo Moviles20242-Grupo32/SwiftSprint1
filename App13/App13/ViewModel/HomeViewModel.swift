@@ -74,6 +74,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         }
     }
     
+    
     //Anonymus login for reading Database
     
     func login(){

@@ -7,11 +7,14 @@
 
 import SwiftUI
 import SDWebImageSwiftUI
+import FirebaseAnalytics
 
 struct CartView: View {
     
     @ObservedObject var homeData: HomeViewModel
     @Environment(\.presentationMode) var present
+    var initialTime: TimeInterval
+    
     var body: some View {
         VStack{
             
@@ -78,13 +81,13 @@ struct CartView: View {
                                     Button(action: {
                                         homeData.cartItems[homeData.getIndex(item: cart.item, isCartIndex: true)].quantity += 1
                                     }){
-                                                
+                                        
                                         Image(systemName: "plus")
                                             .font(.system(size: 16,weight: .heavy))
                                             .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                                     }
                                 }
-
+                                
                             }
                         }
                         .padding()
@@ -125,8 +128,21 @@ struct CartView: View {
                 }
                 .padding([.top,.horizontal])
                 
-                Button(action: homeData.updateOrder){
+                Button(action: {
+
+                    let elapsedTime = Date().timeIntervalSince1970 - initialTime
+                    Analytics.logEvent("time_to_checkout", parameters: [
+                        "elapsed_time": NSNumber(value: elapsedTime)
+                    ])
+//                    print("DEBUG BQ: \(elapsedTime)")
+//                    print("DEBUG: startime: \(initialTime)")
                     
+                    Analytics.logEvent("proceed_to_checkout", parameters: [
+                        "timestamp": NSNumber(value: Date().timeIntervalSince1970)
+                    ])
+                    homeData.updateOrder()
+                    
+                }){
                     Text(homeData.ordered ? "Cancel Order": "Check out")
                         .font(.title2)
                         .fontWeight(.heavy)
