@@ -158,7 +158,7 @@ struct Home: View {
                                         
                                         Button(action: {
                                             searchStartTime = Date().timeIntervalSince1970
-                                            Analytics.logEvent("product_search_started", parameters: [
+                                            Analytics.logEvent("product_selection_started", parameters: [
                                                 "timestamp": searchStartTime.map { NSNumber(value: $0) } ?? NSNumber(value: 0)
                                             ])
                                             

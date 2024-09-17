@@ -30,6 +30,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     @Published var cartItems: [Cart] = []
     @Published var ordered = false
+
+    @Published var db = FirestoreManager.shared.db
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch manager.authorizationStatus {
@@ -89,18 +91,26 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         }
     }
     
-    func fetchData() {
-            DatabaseManager.shared.fetchItems { [weak self] (items, error) in
-                if let error = error {
-                    print("Error fetching items: \(error)")
-                    return
-                }
+    func fetchData(){
+        
+        
+        db.collection("Items").getDocuments{ (snap, err) in
+            
+            guard let itemData = snap else{return}
+            
+            self.items=itemData.documents.compactMap{ (doc) -> Item? in
                 
-                if let items = items {
-                    self?.items = items
-                    self?.filtered = items
-                }
+                let id = doc.documentID
+                let name = doc.get("item_name") as! String
+                let cost = doc.get("item_cost") as! NSNumber
+                let ratings = doc.get("item_ratings") as! String
+                let image = doc.get("item_image") as! String
+                let details = doc.get("item_details") as! String
+                
+                return Item(id: id, item_name: name, item_cost: cost, item_details: details, item_image: image, item_ratings: ratings)
             }
+            self.filtered = self.items
+        }
     }
     
     func filterData(){
@@ -163,48 +173,48 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         return format.string(from: NSNumber(value: value)) ?? ""
     }
     
-    func updateOrder() {
-            let userId = Auth.auth().currentUser!.uid
+    func updateOrder(){
+        
+        if ordered{
+            ordered = false
             
-            if ordered {
-                ordered = false
+            
+            db.collection("Users").document(Auth.auth().currentUser!.uid).delete{
+                (err) in
                 
-                // Call DatabaseManager to delete the order
-                DatabaseManager.shared.deleteOrder(for: userId) { [weak self] error in
-                    if let error = error {
-                        print("Error deleting order: \(error)")
-                        self?.ordered = true
-                    }
+                if err != nil{
+                    self.ordered = true
                 }
-                
+            }
+            
+            return
+        }
+        
+        var details : [[String: Any]] = []
+        
+        cartItems.forEach { (cart) in
+            details.append([
+                "item_name": cart.item.item_name,
+                "item_quantity": cart.quantity,
+                "item_cost": cart.item.item_cost
+            ])
+        }
+
+        ordered = true
+        db.collection("Orders").document(Auth.auth().currentUser!.uid).setData([
+            
+            "ordered_food": details,
+            "total_cost": calculateTotalPrice(),
+            "location": GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)
+            
+        ]) { (err) in
+            
+            if err != nil{
+                self.ordered = false
                 return
             }
             
-            var details: [[String: Any]] = []
-            
-            cartItems.forEach { cart in
-                details.append([
-                    "item_name": cart.item.item_name,
-                    "item_quantity": cart.quantity,
-                    "item_cost": cart.item.item_cost
-                ])
-            }
-            
-            ordered = true
-            
-            // Call DatabaseManager to set the order
-            DatabaseManager.shared.setOrder(for: userId, details: details, totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)) { [weak self] error in
-                if let error = error {
-                    print("Error setting order: \(error)")
-                    self?.ordered = false
-                }
-            }
         }
-        
-        func calculateTotalPrice() -> NSNumber {
-            // Assuming there's logic here to calculate total price
-            return cartItems.reduce(0) { $0 + $1.item.item_cost.floatValue * Float($1.quantity) } as NSNumber
-        }
-
+    }
     
 }
