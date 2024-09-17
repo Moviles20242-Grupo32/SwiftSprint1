@@ -99,12 +99,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                 if let items = items {
                     self?.items = items
                     self?.filtered = items
-                    // Assign the most ordered item to the 'favorite' variable using the 'getFavorite' function
-                    if let favoriteItem = self?.getFavorite() {
-                        self?.favorite = favoriteItem
-                    } else {
-                        print("No favorite item found.")
-                    }
+                    self?.favorite = self?.getFavorite()
                 }
             }
     }
@@ -119,22 +114,42 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func addToCart(item:Item){
         
-        self.items[getIndex(item: item, isCartIndex: false)].isAdded = !item.isAdded
+//        self.items[getIndex(item: item, isCartIndex: false)].isAdded = !item.isAdded
+//        
+//        let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
+//            return item.id == item1.id
+//        } ?? 0
+//        
+//        self.filtered[filteredIndex].isAdded = !item.isAdded
+//        
+//        if item.isAdded {
+//            
+//            self.cartItems.remove(at: getIndex(item: item, isCartIndex: true))
+//            return
+//        }
+//        
+//        self.cartItems.append(Cart(item:item, quantity: 1))
+//        print(self.cartItems)
         
+        let index = getIndex(item: item, isCartIndex: false)
         let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
             return item.id == item1.id
         } ?? 0
         
-        self.filtered[filteredIndex].isAdded = !item.isAdded
-        
-        if item.isAdded {
-            
-            self.cartItems.remove(at: getIndex(item: item, isCartIndex: true))
-            return
+        // Toggle the isAdded state
+        items[index].isAdded.toggle()
+        filtered[filteredIndex].isAdded.toggle()
+
+        // Ensure favorite is updated if it's the same item
+        if favorite?.id == item.id {
+            favorite?.isAdded = items[index].isAdded
         }
-        
-        self.cartItems.append(Cart(item:item, quantity: 1))
-        print(self.cartItems)
+
+        if items[index].isAdded {
+            cartItems.append(Cart(item: items[index], quantity: 1))
+        } else {
+            cartItems.remove(at: getIndex(item: item, isCartIndex: true))
+        }
         
     }
     
@@ -221,6 +236,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     func getFavorite() -> Item? {
         return items.max(by: { $0.times_ordered < $1.times_ordered })
     }
+
         
         
 

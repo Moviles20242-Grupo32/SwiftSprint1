@@ -166,6 +166,37 @@ struct Home: View {
                                     .padding(.trailing, 10)
                                     .padding(.top, 10)
                                 }
+                                VStack(spacing:25){
+                                    Text("Caja más pedida")
+                                    if let favorite = HomeModel.favorite{
+                                        HStack{
+                                            ItemView(item: favorite)
+                                                .padding(15)
+                                            
+                                            Spacer()
+                                                .frame(width: 10)
+                                            
+                                            Button(action: {
+                                                HomeModel.addToCart(item: favorite)
+                                            }, label: {
+                                                Image(systemName:  favorite.isAdded ? "checkmark" : "plus")
+                                                    .resizable()  // Make the image resizable
+                                                    .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
+                                                    .frame(width: 10, height: 10)  // Set the width and height
+                                                    .foregroundColor(.white)
+                                                    .padding(10)
+                                                    .background(favorite.isAdded ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                                                    .clipShape(Circle())
+                                            })
+                                        }
+                                        .padding(.trailing, 10)
+                                        
+                                    }
+                                    else {
+                                        Text("No hay caja favorita")
+                                    }
+                                    
+                                }
                             }
                             .padding(.top, 10)
                         })
