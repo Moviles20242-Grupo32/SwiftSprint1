@@ -77,23 +77,27 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-FIRDebugEnabled"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-FIRAnalyticsVerboseLoggingDisabled"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-FIRDebigDisabled"
-            isEnabled = "NO">
+            argument = "-FIRDebugDisabled"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-FIRDebugAnalyticsEnabled"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-FIRAnalyticsVerboseLoggingEnabled"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-FIRDebugAnalyticsDisabled"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
