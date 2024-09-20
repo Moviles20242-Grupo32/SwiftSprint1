@@ -9,7 +9,7 @@ import SwiftUI
 
 struct Item: Identifiable {
     
-    var id: String
+var id: String
     var item_name: String
     var item_cost: NSNumber
     var item_details: String
