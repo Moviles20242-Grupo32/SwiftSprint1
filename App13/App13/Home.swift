@@ -87,14 +87,6 @@ struct Home: View {
                             .fontWeight(.heavy)
                             .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
                     }
-                    //show location in lat-log (debugging)
-                    if let userLocation = LocationModel.userLocation {
-                        Text("Your location: \(String(format: "%.2f", userLocation.coordinate.latitude)), \(String(format: "%.2f", userLocation.coordinate.longitude))")
-                            .font(.caption)
-                            .fontWeight(.heavy)
-                            .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
-                        
-                    }
                     
                     HStack(spacing: 15){
                         

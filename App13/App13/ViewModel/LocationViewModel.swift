@@ -23,23 +23,23 @@ class LocationViewModel: ObservableObject {
     init(locationManager: LocationManager = LocationManager()) {
         self.locationManager = locationManager
         observeLocation()
-        sendTestNotification()
+//        sendTestNotification()
     }
     
-    func sendTestNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "Test Notification"
-        content.body = "This is a test notification."
-        
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Error adding notification: \(error.localizedDescription)")
-            }
-        }
-    }
+//    func sendTestNotification() {
+//        let content = UNMutableNotificationContent()
+//        content.title = "Test Notification"
+//        content.body = "This is a test notification."
+//        
+//        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+//        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+//        
+//        UNUserNotificationCenter.current().add(request) { error in
+//            if let error = error {
+//                print("Error adding notification: \(error.localizedDescription)")
+//            }
+//        }
+//    }
     
     func extractLocation() {
         guard let location = self.userLocation else { return }
@@ -65,13 +65,13 @@ class LocationViewModel: ObservableObject {
                 address += ", \(locality)"
             }
             
-            print("Extracted address: \(address)")
             self.userAddress = address
         }
     }
     
     func observeLocation() {
         locationManager.$userLocation
+            .throttle(for: .seconds(60), scheduler: DispatchQueue.main, latest: true)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] location in
                 guard let self = self, let location = location else { return }
@@ -81,6 +81,7 @@ class LocationViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
+    
     
     func checkProximity(userLocation: CLLocation) {
         let distance = userLocation.distance(from: targetLocation)
@@ -103,8 +104,8 @@ class LocationViewModel: ObservableObject {
     
     func sendNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "You're nearby!"
-        content.body = "You are within 2km of the target location."
+        content.title = "Estás cerca!"
+        content.body = "Hay un restaurante Foodies a 2km de ti"
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
