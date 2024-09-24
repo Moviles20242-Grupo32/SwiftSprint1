@@ -1,16 +1,15 @@
 //
-//  Manager.swift
+//  FirestoreManager.swift
 //  App13
 //
-//  Created by Daniela Uribe on 15/09/24.
+//  Created by Daniela Uribe on 11/09/24.
 //
 
 import SwiftUI
 import FirebaseFirestore
 
-class DatabaseManager {
-    
-    static let shared = DatabaseManager()
+class FirestoreManager: ObservableObject {
+    static let shared = FirestoreManager() // Singleton instance
     
     @Published var db: Firestore
     
