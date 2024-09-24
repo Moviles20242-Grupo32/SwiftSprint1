@@ -29,6 +29,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     //ItemData
     @Published var items: [Item] = []
     @Published var filtered: [Item] = []
+    @Published var favorite: Item? = nil
     
     @Published var cartItems: [Cart] = []
     @Published var ordered = false
@@ -76,6 +77,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         }
     }
     
+    
     //Anonymus login for reading Database
     
     func login(){
@@ -102,6 +104,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                 if let items = items {
                     self?.items = items
                     self?.filtered = items
+                    self?.favorite = self?.getFavorite()
                 }
             }
     }
@@ -116,22 +119,42 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func addToCart(item:Item){
         
-        self.items[getIndex(item: item, isCartIndex: false)].isAdded = !item.isAdded
+//        self.items[getIndex(item: item, isCartIndex: false)].isAdded = !item.isAdded
+//        
+//        let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
+//            return item.id == item1.id
+//        } ?? 0
+//        
+//        self.filtered[filteredIndex].isAdded = !item.isAdded
+//        
+//        if item.isAdded {
+//            
+//            self.cartItems.remove(at: getIndex(item: item, isCartIndex: true))
+//            return
+//        }
+//        
+//        self.cartItems.append(Cart(item:item, quantity: 1))
+//        print(self.cartItems)
         
+        let index = getIndex(item: item, isCartIndex: false)
         let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
             return item.id == item1.id
         } ?? 0
         
-        self.filtered[filteredIndex].isAdded = !item.isAdded
-        
-        if item.isAdded {
-            
-            self.cartItems.remove(at: getIndex(item: item, isCartIndex: true))
-            return
+        // Toggle the isAdded state
+        items[index].isAdded.toggle()
+        filtered[filteredIndex].isAdded.toggle()
+
+        // Ensure favorite is updated if it's the same item
+        if favorite?.id == item.id {
+            favorite?.isAdded = items[index].isAdded
         }
-        
-        self.cartItems.append(Cart(item:item, quantity: 1))
-        print(self.cartItems)
+
+        if items[index].isAdded {
+            cartItems.append(Cart(item: items[index], quantity: 1))
+        } else {
+            cartItems.remove(at: getIndex(item: item, isCartIndex: true))
+        }
         
     }
     
@@ -184,6 +207,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             }
             
             var details: [[String: Any]] = []
+            var items_ids: [[String: Any]] = []
             
             cartItems.forEach { cart in
                 details.append([
@@ -191,12 +215,17 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                     "item_quantity": cart.quantity,
                     "item_cost": cart.item.item_cost
                 ])
+                
+                items_ids.append([
+                    "id":cart.item.id,
+                    "num":cart.quantity
+                ])
             }
             
             ordered = true
             
             // Call DatabaseManager to set the order
-            DatabaseManager.shared.setOrder(for: userId, details: details, totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)) { [weak self] error in
+        DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)) { [weak self] error in
                 if let error = error {
                     print("Error setting order: \(error)")
                     self?.ordered = false
@@ -204,8 +233,17 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             }
         }
         
-        func calculateTotalPrice() -> NSNumber {
-            // Assuming there's logic here to calculate total price
-            return cartItems.reduce(0) { $0 + $1.item.item_cost.floatValue * Float($1.quantity) } as NSNumber
-        }    
+    func calculateTotalPrice() -> NSNumber {
+        // Assuming there's logic here to calculate total price
+        return cartItems.reduce(0) { $0 + $1.item.item_cost.floatValue * Float($1.quantity) } as NSNumber
+    }
+    
+    func getFavorite() -> Item? {
+        return items.max(by: { $0.times_ordered < $1.times_ordered })
+    }
+
+        
+        
+
+    
 }

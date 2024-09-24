@@ -11,6 +11,7 @@ struct LoginView: View {
     
     @State private var email =  ""
     @State private var password = ""
+    @State private var errorMessage = ""
     @EnvironmentObject var viewModel: AuthViewModel
     
     var body: some View {
@@ -20,6 +21,7 @@ struct LoginView: View {
                 Spacer()
                     .frame(height: 1)
                 
+                //Foodies
                 Image("Palabra")
                     .resizable()
                     .scaledToFill()
@@ -29,15 +31,12 @@ struct LoginView: View {
                 Spacer()
                     .frame(height: 50)
                 
-                //image
+                // Logo foodies
                 Image("AppLogo")
                     .resizable()
                     .scaledToFill()
                     .frame(width: 100, height: 100)
                     .padding(.vertical, 10)
-                
-
-                
                 
                 //form fields
                 VStack(spacing: 24){
@@ -60,6 +59,10 @@ struct LoginView: View {
                 Button {
                     Task {
                         try await viewModel.signIn(withEmail: email,                        password: password)
+                        
+                        if viewModel.incorrectUserPassword{
+                            errorMessage = "Correo electrónico o contraseña incorrectos. Por favor intente de nuevo."
+                        }
                     }
                 } label: {
                     HStack {
@@ -78,9 +81,18 @@ struct LoginView: View {
                                 .shadow(color: Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0), radius: 5, x: 0, y: 2) // Shadow parameters
                             )
                 .disabled(!FormIsValid)
-                .opacity(FormIsValid ? 1.0 : 0.8)
+                .opacity(FormIsValid ? 1.0 : 0.6)
                 .cornerRadius(10)
                 .padding(.top, 24)
+                
+                //If user auth failed.
+                if !errorMessage.isEmpty {
+                    Text(errorMessage)
+                        .frame(width: 350, alignment: .leading)
+                        .foregroundColor(.red)
+                        .font(.subheadline)
+                        .padding(.top, 8)
+                }
                 
                 Spacer()
                 

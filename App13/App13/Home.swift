@@ -14,6 +14,9 @@ struct Home: View {
     @State private var synthesizer: AVSpeechSynthesizer?
     @StateObject var HomeModel = HomeViewModel()
     @State private var searchDebounceTimer: AnyCancellable?
+    @State private var typingStartTime: TimeInterval?
+    @State var searchStartTime: TimeInterval?
+    @StateObject var LocationModel = LocationViewModel()
     
     var body: some View {
         
@@ -55,7 +58,7 @@ struct Home: View {
                         
                         // Carrito de compras
                         NavigationLink(destination: {
-                            CartView(homeData: HomeModel)
+                            CartView(homeData: HomeModel, initialTime: searchStartTime ?? 0)
                         }, label: {
                             Image(systemName: "cart")
                                 .font(.title)
@@ -80,8 +83,8 @@ struct Home: View {
                                 .clipShape(Circle())
                             
                         }).padding(10)
-                
-
+                        
+                        
                         // Profile
                         NavigationLink(destination: {
                             ProfileView()
@@ -95,9 +98,10 @@ struct Home: View {
                     }
                     .padding([.horizontal, .top], 2)
                     
+                    //Ubicacion
                     HStack{
                         
-                        if HomeModel.userLocation == nil{
+                        if LocationModel.userLocation == nil{
                             Text("Localizando...")
                                 .foregroundColor(.black)
                                 .frame(width: 110)
@@ -107,16 +111,12 @@ struct Home: View {
                                 .font(.title2)
                                 .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
                         }
-                     
                         
-                        Text(HomeModel.userAdress)
+                        Text(LocationModel.userAddress)
                             .font(.caption)
                             .fontWeight(.heavy)
                             .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
-                        
                     }
-                    
-                    
                     
                     HStack(spacing: 15){
                         
@@ -131,7 +131,7 @@ struct Home: View {
                                 // Cancel any previous debounce timers
                                 // Cancel any previous debounce timer
                                 searchDebounceTimer?.cancel()
-
+                                
                                 // Start a new debounce timer
                                 searchDebounceTimer = Just(newValue)
                                     .delay(for: .seconds(0.8), scheduler: RunLoop.main)
@@ -145,19 +145,17 @@ struct Home: View {
                                         }
                                     }
                             }
-                        
-                            
                     }
                     .padding(.horizontal)
                     .background(
-                                RoundedRectangle(cornerRadius: 10) // Adjust corner radius as needed
-                                    .fill(Color.white) // Background color of the rectangle
-                                    .shadow(color: Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0), radius: 5, x: 0, y: 2) // Shadow parameters
-                                        )
+                        RoundedRectangle(cornerRadius: 10) // Adjust corner radius as needed
+                            .fill(Color.white) // Background color of the rectangle
+                            .shadow(color: Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0), radius: 5, x: 0, y: 2) // Shadow parameters
+                    )
                     .padding(.horizontal, 20)
                     .padding(.top,10)
                     
-                   
+                    
                     
                     if HomeModel.items.isEmpty{
                         
@@ -170,7 +168,7 @@ struct Home: View {
                     }
                     else{
                         ScrollView(.vertical, showsIndicators: false, content: {
-                            VStack(spacing:25){
+                            VStack(spacing:5){
                                 ForEach(HomeModel.filtered){item in
                                     HStack{
                                         
@@ -181,6 +179,11 @@ struct Home: View {
                                             .frame(width: 10)
                                         
                                         Button(action: {
+                                            searchStartTime = Date().timeIntervalSince1970
+                                            Analytics.logEvent("product_selection_started", parameters: [
+                                                "timestamp": searchStartTime.map { NSNumber(value: $0) } ?? NSNumber(value: 0)
+                                            ])
+                                            
                                             HomeModel.addToCart(item: item)
                                         }, label: {
                                             Image(systemName: item.isAdded ? "checkmark" : "plus")
@@ -194,8 +197,48 @@ struct Home: View {
                                         })
                                     }
                                     .padding(.trailing, 10)
-                                    .padding(.top, 10)
+                                    .padding(.top, 5)
                                 }
+                                VStack(alignment: .leading, spacing:2){
+                                    Text("Caja más pedida")
+                                        .font(.title2)
+                                        .fontWeight(.heavy)
+                                        .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                                        .padding(.leading, 15)
+                                        .padding(.top, 10)
+                                    
+                                    if let favorite = HomeModel.favorite{
+                                        HStack{
+                                            ItemView(item: favorite)
+                                                .padding(15)
+                                            
+                                            Spacer()
+                                                .frame(width: 10)
+                                            
+                                            Button(action: {
+                                                HomeModel.addToCart(item: favorite)
+                                            }, label: {
+                                                Image(systemName:  favorite.isAdded ? "checkmark" : "plus")
+                                                    .resizable()  // Make the image resizable
+                                                    .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
+                                                    .frame(width: 10, height: 10)  // Set the width and height
+                                                    .foregroundColor(.white)
+                                                    .padding(10)
+                                                    .background(favorite.isAdded ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                                                    .clipShape(Circle())
+                                            })
+                                        }
+                                        .padding(.trailing, 10)
+                                        .padding(.top, 0)
+                                    }
+                                    else {
+                                        Text("No hay caja favorita").font(.caption)
+                                    }
+                                    
+                                }
+                                .overlay(RoundedRectangle(cornerRadius: 15)
+                                    .stroke(Color.orange, lineWidth: 4))
+                                .padding(10)
                             }
                             .padding(.top, 10)
                         })
@@ -218,9 +261,9 @@ struct Home: View {
         }
         .navigationBarHidden(true)
         .edgesIgnoringSafeArea(.top)
-        
         .onAppear(perform: {
             HomeModel.locationManager.delegate = HomeModel
+            LocationModel.requestNotificationPermission()
         })
         .onChange(of: HomeModel.search, perform:{ value in
             

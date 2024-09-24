@@ -1,16 +1,15 @@
 //
-//  Manager.swift
+//  FirestoreManager.swift
 //  App13
 //
-//  Created by Daniela Uribe on 15/09/24.
+//  Created by Daniela Uribe on 11/09/24.
 //
 
 import SwiftUI
 import FirebaseFirestore
 
-class DatabaseManager {
-    
-    static let shared = DatabaseManager()
+class DatabaseManager: ObservableObject {
+    static let shared = DatabaseManager() // Singleton instance
     
     @Published var db: Firestore
     
@@ -40,8 +39,9 @@ class DatabaseManager {
                 let ratings = doc.get("item_ratings") as! String
                 let image = doc.get("item_image") as! String
                 let details = doc.get("item_details") as! String
+                let times = doc.get("times_ordered") as! Int
                 
-                return Item(id: id, item_name: name, item_cost: cost, item_details: details, item_image: image, item_ratings: ratings)
+                return Item(id: id, item_name: name, item_cost: cost, item_details: details, item_image: image, item_ratings: ratings, times_ordered: times)
             }
             
             completion(items, nil)
@@ -57,7 +57,7 @@ class DatabaseManager {
         }
         
     // Method to update/set order details
-    func setOrder(for userId: String, details: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
+    func setOrder(for userId: String, details: [[String: Any]], ids: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
         let db = Firestore.firestore()
         
         db.collection("Orders").document(userId).setData([
@@ -67,6 +67,38 @@ class DatabaseManager {
         ]) { (err) in
             completion(err)
         }
+        
+        
+        // Iterate through each item ID and update 'times_ordered'
+        ids.forEach { id in
+            let itemId = id["id"] as? String ?? "Unknown"
+            let quantity = id["num"] as? Int ?? 0
+            
+            // Fetch the current 'times_ordered' value
+            db.collection("Items").document(itemId).getDocument { (document, error) in
+                if let document = document, document.exists {
+                    let currentTimesOrdered = document.data()?["times_ordered"] as? Int ?? 0
+                    
+                    // Update 'times_ordered' by adding the incoming quantity
+                    db.collection("Items").document(itemId).updateData([
+                        "times_ordered": currentTimesOrdered + quantity
+                    ]) { err in
+                        if let err = err {
+                            print("Error updating times_ordered: \(err)")
+                        } else {
+                            print("Successfully updated times_ordered for item \(itemId)")
+                        }
+                    }
+                } else {
+                    print("Document does not exist for item \(itemId)")
+                }
+            }
+        }
+        
+        
     }
+    
+
+
 }
 
