@@ -102,7 +102,7 @@ struct CartView: View {
                                 
                                 homeData.cartItems.remove(at: index)
                             }){
-                                Text("Remove")
+                                Text("Eliminar")
                                     .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255))
                             }
                             

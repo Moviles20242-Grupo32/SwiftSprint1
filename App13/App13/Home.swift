@@ -87,14 +87,6 @@ struct Home: View {
                             .fontWeight(.heavy)
                             .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
                     }
-                    //show location in lat-log (debugging)
-                    if let userLocation = LocationModel.userLocation {
-                        Text("Your location: \(String(format: "%.2f", userLocation.coordinate.latitude)), \(String(format: "%.2f", userLocation.coordinate.longitude))")
-                            .font(.caption)
-                            .fontWeight(.heavy)
-                            .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
-                        
-                    }
                     
                     HStack(spacing: 15){
                         
@@ -146,7 +138,7 @@ struct Home: View {
                     }
                     else{
                         ScrollView(.vertical, showsIndicators: false, content: {
-                            VStack(spacing:25){
+                            VStack(spacing:5){
                                 ForEach(HomeModel.filtered){item in
                                     HStack{
                                         
@@ -175,8 +167,48 @@ struct Home: View {
                                         })
                                     }
                                     .padding(.trailing, 10)
-                                    .padding(.top, 10)
+                                    .padding(.top, 5)
                                 }
+                                VStack(alignment: .leading, spacing:2){
+                                    Text("Caja más pedida")
+                                        .font(.title2)
+                                        .fontWeight(.heavy)
+                                        .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                                        .padding(.leading, 15)
+                                        .padding(.top, 10)
+                                    
+                                    if let favorite = HomeModel.favorite{
+                                        HStack{
+                                            ItemView(item: favorite)
+                                                .padding(15)
+                                            
+                                            Spacer()
+                                                .frame(width: 10)
+                                            
+                                            Button(action: {
+                                                HomeModel.addToCart(item: favorite)
+                                            }, label: {
+                                                Image(systemName:  favorite.isAdded ? "checkmark" : "plus")
+                                                    .resizable()  // Make the image resizable
+                                                    .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
+                                                    .frame(width: 10, height: 10)  // Set the width and height
+                                                    .foregroundColor(.white)
+                                                    .padding(10)
+                                                    .background(favorite.isAdded ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                                                    .clipShape(Circle())
+                                            })
+                                        }
+                                        .padding(.trailing, 10)
+                                        .padding(.top, 0)
+                                    }
+                                    else {
+                                        Text("No hay caja favorita").font(.caption)
+                                    }
+                                    
+                                }
+                                .overlay(RoundedRectangle(cornerRadius: 15)
+                                    .stroke(Color.orange, lineWidth: 4))
+                                .padding(10)
                             }
                             .padding(.top, 10)
                         })
