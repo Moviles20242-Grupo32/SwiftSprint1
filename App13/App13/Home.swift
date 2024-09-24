@@ -21,7 +21,27 @@ struct Home: View {
             ZStack(alignment: .leading){
                 VStack(spacing:10){
                     
-                    HStack(spacing:15){
+                ZStack{
+                        // Rectangle background
+                        RoundedRectangle(cornerRadius: 15)
+                                        .fill(Color.orange)
+                                        .frame(width: 350, height: 50) // Adjust size here
+                                        .shadow(radius: 5)
+                        
+                        // Text and Image in the center
+                        VStack {
+                            // Text
+                            Text("¡Come por menos con Foodies!")
+                                .font(.title3)
+                                .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 12)
+                                .padding(.top, 3)// Padding between text and image
+                        
+                        }
+                    }
+                    
+                    HStack(spacing:5){
                         
                         // Carrito de compras
                         NavigationLink(destination: {
@@ -63,7 +83,7 @@ struct Home: View {
                         }).padding(10)
                         
                     }
-                    .padding([.horizontal,.top])
+                    .padding([.horizontal, .top], 2)
                     
                     HStack{
                         
