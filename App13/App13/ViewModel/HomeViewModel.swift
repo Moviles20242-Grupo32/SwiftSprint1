@@ -31,8 +31,6 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     @Published var cartItems: [Cart] = []
     @Published var ordered = false
-
-    @Published var db = FirestoreManager.shared.db
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch manager.authorizationStatus {

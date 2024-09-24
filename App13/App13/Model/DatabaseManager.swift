@@ -8,8 +8,8 @@
 import SwiftUI
 import FirebaseFirestore
 
-class FirestoreManager: ObservableObject {
-    static let shared = FirestoreManager() // Singleton instance
+class DatabaseManager: ObservableObject {
+    static let shared = DatabaseManager() // Singleton instance
     
     @Published var db: Firestore
     
