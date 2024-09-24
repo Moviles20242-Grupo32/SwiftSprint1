@@ -10,6 +10,8 @@ import CoreLocation
 import Firebase
 import FirebaseAuth
 import Foundation
+import AVFoundation
+import Combine
 
 class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
@@ -30,6 +32,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     @Published var cartItems: [Cart] = []
     @Published var ordered = false
+    
+    @State private var synthesizer: AVSpeechSynthesizer?
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch manager.authorizationStatus {
@@ -203,7 +207,5 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         func calculateTotalPrice() -> NSNumber {
             // Assuming there's logic here to calculate total price
             return cartItems.reduce(0) { $0 + $1.item.item_cost.floatValue * Float($1.quantity) } as NSNumber
-        }
-
-    
+        }    
 }

@@ -21,25 +21,35 @@ struct Home: View {
             ZStack(alignment: .leading){
                 VStack(spacing:10){
                     
-                ZStack{
-                        // Rectangle background
+                    ZStack {
+                        // Gradient background with a rounded rectangle
                         RoundedRectangle(cornerRadius: 15)
-                                        .fill(Color.orange)
-                                        .frame(width: 350, height: 50) // Adjust size here
-                                        .shadow(radius: 5)
-                        
-                        // Text and Image in the center
-                        VStack {
-                            // Text
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.orange.opacity(1), Color.orange.opacity(0.5)]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .frame(width: 350, height: 50)
+                            .shadow(color: .gray.opacity(0.4), radius: 10, x: 0, y: 4) // Softer shadow for depth
+
+                        // Text and icon
+                        HStack {
+
+                            // Centered Text
                             Text("¡Come por menos con Foodies!")
-                                .font(.title3)
+                                .font(.headline)
+                                .fontWeight(.semibold)
                                 .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                                 .multilineTextAlignment(.center)
+                                .lineLimit(1)
                                 .padding(.horizontal, 12)
-                                .padding(.top, 3)// Padding between text and image
-                        
+
                         }
+                        .padding(.vertical, 8)
                     }
+
                     
                     HStack(spacing:5){
                         
