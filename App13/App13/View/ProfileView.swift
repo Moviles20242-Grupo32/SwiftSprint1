@@ -31,21 +31,22 @@ struct ProfileView: View {
                 List {
                     Section {
                         HStack {
-                            Text(user.initials)
+                            Text(user.initials) //
                                 .font(.title)
                                 .fontWeight(.semibold)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                                 .frame(width: 72, height: 72)
                                 .background(Color.orange)
                                 .clipShape(Circle())
                             
                             VStack(alignment: .leading, spacing: 4){
-                                Text(user.fullname)
+                                Text(user.fullname) //
                                     .font(.subheadline)
+                                    .foregroundStyle(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                                     .fontWeight(.semibold)
                                     .padding(.top, 4)
                                 
-                                Text(user.email)
+                                Text(user.email) //
                                     .font(.footnote)
                                     .accentColor(.gray)
                             }
@@ -59,18 +60,18 @@ struct ProfileView: View {
                                 .font(.title)
                                 .foregroundColor(Color(.systemGray))
                             
-                            Text("Version")
+                            Text("Versión")
                                 .font(.subheadline)
-                                .foregroundStyle(.black)
+                                .foregroundStyle(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                             
                             Spacer()
                             
                             Text("1.0.0")
                                 .font(.subheadline)
-                                .foregroundStyle(.gray)
+                                .foregroundStyle(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                         }
                     }
-                    Section("Account"){
+                    Section("Cuenta"){
                         
                         VStack(alignment: .leading, spacing: 5){
                             
@@ -83,9 +84,9 @@ struct ProfileView: View {
                                         .font(.title)
                                         .foregroundColor(Color(.systemRed))
                                     
-                                    Text("Sign Out")
+                                    Text("Cerrar Sesión")
                                         .font(.subheadline)
-                                        .foregroundStyle(.black)
+                                        .foregroundStyle(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                                     
                                 }
                             }
