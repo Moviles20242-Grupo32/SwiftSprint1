@@ -98,6 +98,17 @@ class DatabaseManager: ObservableObject {
         
     }
     
+    func fetchUser(uid: String) async throws -> User? {
+            let snapshot = try await db.collection("users").document(uid).getDocument()
+            return try snapshot.data(as: User.self)
+        }
+
+        // Function to create user
+        func createUser(user: User) async throws {
+            let encodedUser = try Firestore.Encoder().encode(user)
+            try await db.collection("users").document(user.id).setData(encodedUser)
+        }
+    
 
 
 }

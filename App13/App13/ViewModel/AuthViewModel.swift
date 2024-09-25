@@ -22,7 +22,6 @@ class AuthViewModel: ObservableObject {
     
     init(){
         self.userSession = Auth.auth().currentUser
-        
         Task{
             await fetchUser()
         }
@@ -46,8 +45,7 @@ class AuthViewModel: ObservableObject {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             self.userSession = result.user
             let user = User(id: result.user.uid, fullname: fullname, email: email)
-            let encodedUser = try Firestore.Encoder().encode(user)
-            try await Firestore.firestore().collection("users").document(user.id).setData(encodedUser)
+            try await DatabaseManager.shared.createUser(user: user)
             await fetchUser()
         }catch{
             print("DEBUG: Failed to create user with error \(error.localizedDescription)")
@@ -64,10 +62,14 @@ class AuthViewModel: ObservableObject {
         }
     }
     
-    func fetchUser() async{
-        guard let uid = Auth.auth().currentUser?.uid else {return}
-        guard let snapshot = try? await Firestore.firestore().collection("users").document(uid).getDocument() else {return}
-        self.currentUser = try? snapshot.data(as: User.self)
+    func fetchUser() async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        do {
+            // Use DatabaseManager to fetch user
+            self.currentUser = try await DatabaseManager.shared.fetchUser(uid: uid)
+        } catch {
+            print("DEBUG: Failed to fetch user with error \(error.localizedDescription)")
+        }
     }
     
 }
