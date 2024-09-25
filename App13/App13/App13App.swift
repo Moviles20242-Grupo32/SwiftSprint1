@@ -42,6 +42,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
         return true
     }
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+            // Sign the user out when app is about to close
+        @EnvironmentObject var viewModel: AuthViewModel
+        viewModel.signOut()
+    }
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {

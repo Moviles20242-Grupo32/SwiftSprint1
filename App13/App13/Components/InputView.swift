@@ -16,21 +16,30 @@ struct InputView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            
             Text(title)
-                .foregroundStyle(Color(.darkGray))
+                .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                 .fontWeight(.semibold)
                 .font(.footnote)
             
-            if isSecureField {
-                SecureField(placeHolder, text: $text)
-                    .font(.system(size: 14))
-            } else {
-                TextField(placeHolder, text: $text)
-                    .font(.system(size: 14))
+            ZStack(alignment: .leading) {
+                if text.isEmpty {
+                    // Custom colored placeholder text
+                    Text(placeHolder)
+                        .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                        .font(.system(size: 14))
+                }
+                
+                if isSecureField {
+                    SecureField("", text: $text)
+                        .font(.system(size: 14))
+                } else {
+                    TextField("", text: $text)
+                        .font(.system(size: 14))
+                        .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
+                }
             }
-            
-            Divider()
+
+
         }
     }
 }

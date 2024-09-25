@@ -7,23 +7,51 @@
 
 import SwiftUI
 import SDWebImageSwiftUI
+import AVFoundation
 import FirebaseAnalytics
 
 struct CartView: View {
     
     @ObservedObject var homeData: HomeViewModel
+    @State private var synthesizer: AVSpeechSynthesizer?
     @Environment(\.presentationMode) var present
     var initialTime: TimeInterval
     
     var body: some View {
         VStack{
             
-            HStack(spacing: 20){
-                Button(action: {present.wrappedValue.dismiss()}){
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 26, weight: .heavy))
-                        .foregroundColor(.orange)
+                HStack{
+                    
+                    Button(action: {present.wrappedValue.dismiss()}){
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 26, weight: .heavy))
+                            .foregroundColor(.orange)
+                    }.padding()
+                
+                    Spacer()
+                    
+                    Button(action:{
+                        var elementsString: String {
+                            homeData.cartItems.map { $0.item.item_name }.joined(separator: " ")
+                        }
+                        speak(elements: " " + elementsString)
+                    },
+                           label: {
+                        Image(systemName: "megaphone")
+                            .resizable()
+                            .foregroundColor(.white)
+                            .frame(width: 20, height: 20)
+                            .padding(13)
+                            .background(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                            .clipShape(Circle())
+                        
+                    }).padding(.trailing, 175)
+                    
+                    
+                
                 }
+            
+            HStack(spacing: 20){
                 
                 Text("Carrito")
                     .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
@@ -159,6 +187,24 @@ struct CartView: View {
         }
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+    }
+    
+    func speak(elements: String) {
+        
+        let audioSession = AVAudioSession() // 2) handle audio session first, before trying to read the text
+        do {
+            try audioSession.setCategory(.playback, mode: .default, options: .duckOthers)
+            try audioSession.setActive(false)
+        } catch let error {
+            print("❓", error.localizedDescription)
+        }
+        
+        synthesizer = AVSpeechSynthesizer()
+        
+        let speechUtterance = AVSpeechUtterance(string: "Las cajas disponibles son " + elements)
+        speechUtterance.voice = AVSpeechSynthesisVoice(language: "es-MX")
+        
+        synthesizer?.speak(speechUtterance)
     }
 }
 
