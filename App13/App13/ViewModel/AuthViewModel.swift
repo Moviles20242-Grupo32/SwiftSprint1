@@ -19,6 +19,7 @@ class AuthViewModel: ObservableObject {
     @Published var userSession: FirebaseAuth.User?
     @Published var currentUser: User?
     @Published var incorrectUserPassword: Bool = false
+    @Published var userExists: Bool = false
     
     init(){
         self.userSession = Auth.auth().currentUser
@@ -41,14 +42,25 @@ class AuthViewModel: ObservableObject {
     }
     
     func createUser(withEmail email: String, password: String, fullname: String) async throws {
-        do{
-            let result = try await Auth.auth().createUser(withEmail: email, password: password)
-            self.userSession = result.user
-            let user = User(id: result.user.uid, fullname: fullname, email: email)
-            try await DatabaseManager.shared.createUser(user: user)
-            await fetchUser()
-        }catch{
-            print("DEBUG: Failed to create user with error \(error.localizedDescription)")
+        
+        //checks if the user already exists before creating a new one.
+        do {
+            if let user = try await DatabaseManager.shared.fetchUser(byEmail: email) {
+                userExists = true
+            }else { //user does not exists, proceed to create a new one.
+                
+                do{
+                    let result = try await Auth.auth().createUser(withEmail: email, password: password)
+                    self.userSession = result.user
+                    let user = User(id: result.user.uid, fullname: fullname, email: email)
+                    try await DatabaseManager.shared.createUser(user: user)
+                    await fetchUser()
+                }catch{
+                    print("DEBUG: Failed to create user with error: \(error.localizedDescription)")
+                }
+            }
+        } catch {
+            print("Failed to fetch user during Create User validation: \(error.localizedDescription)")
         }
     }
     

@@ -16,7 +16,7 @@ class DatabaseManager: ObservableObject {
     private init() {
         db = Firestore.firestore()
     } // Singleton pattern
-
+    
     func fetchItems(completion: @escaping ([Item]?, Error?) -> Void) {
         
         db.collection("Items").getDocuments { (snap, err) in
@@ -49,13 +49,13 @@ class DatabaseManager: ObservableObject {
     }
     
     func deleteOrder(for userId: String, completion: @escaping (Error?) -> Void) {
-            let db = Firestore.firestore()
-            
-            db.collection("Orders").document(userId).delete { (err) in
-                completion(err)
-            }
-        }
+        let db = Firestore.firestore()
         
+        db.collection("Orders").document(userId).delete { (err) in
+            completion(err)
+        }
+    }
+    
     // Method to update/set order details
     func setOrder(for userId: String, details: [[String: Any]], ids: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
         let db = Firestore.firestore()
@@ -99,17 +99,27 @@ class DatabaseManager: ObservableObject {
     }
     
     func fetchUser(uid: String) async throws -> User? {
-            let snapshot = try await db.collection("users").document(uid).getDocument()
-            return try snapshot.data(as: User.self)
-        }
-
-        // Function to create user
-        func createUser(user: User) async throws {
-            let encodedUser = try Firestore.Encoder().encode(user)
-            try await db.collection("users").document(user.id).setData(encodedUser)
-        }
+        let snapshot = try await db.collection("users").document(uid).getDocument()
+        return try snapshot.data(as: User.self)
+    }
     
-
-
+    func fetchUser(byEmail email: String) async throws -> User? {
+        let snapshot = try await db.collection("users").whereField("email", isEqualTo: email).getDocuments()
+        
+        guard let document = snapshot.documents.first else {
+            return nil // No user found with the provided email
+        }
+        
+        return try document.data(as: User.self) // Decode Firestore document to a User object
+    }
+    
+    // Function to create user
+    func createUser(user: User) async throws {
+        let encodedUser = try Firestore.Encoder().encode(user)
+        try await db.collection("users").document(user.id).setData(encodedUser)
+    }
+    
+    
+    
 }
 
