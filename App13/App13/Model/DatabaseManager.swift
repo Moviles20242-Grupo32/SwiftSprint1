@@ -63,6 +63,16 @@ class DatabaseManager: ObservableObject {
     
     // Method to delete an order for a specific user based on userId
     func deleteOrder(for userId: String, completion: @escaping (Error?) -> Void) {
+        let db = Firestore.firestore()
+        
+        db.collection("Orders").document(userId).delete { (err) in
+            completion(err)
+        }
+    }
+    
+    // Method to update/set order details
+    func setOrder(for userId: String, details: [[String: Any]], ids: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
+        let db = Firestore.firestore()
         
         // Access the "Orders" collection and delete the document for the given userId
         db.collection("Orders").document(userId).delete { (err) in
@@ -130,4 +140,5 @@ class DatabaseManager: ObservableObject {
         // Save the encoded user data to Firestore
         try await db.collection("users").document(user.id).setData(encodedUser)
     }
+
 }

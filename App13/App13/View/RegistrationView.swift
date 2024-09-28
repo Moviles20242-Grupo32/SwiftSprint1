@@ -12,6 +12,10 @@ struct RegistrationView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
+    @State private var errorMessageName = ""
+    @State private var errorMessageEmail = ""
+    @State private var errorMessagePassword = ""
+    @State private var errorMessageUserExists = ""
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var viewModel: AuthViewModel
     @Environment(\.presentationMode) var present
@@ -43,15 +47,51 @@ struct RegistrationView: View {
                           title: "Usuario",
                           placeHolder: "Ingresa un usuario")
                 
+                if !errorMessageName.isEmpty { //&& (fullName.count > 15 || fullName.isEmpty)
+                    Text(errorMessageName)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.red)
+                        .font(.subheadline)
+                        .padding(.top, 8)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: /*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+                }
+                
                 InputView(text: $email,
                           title: "Correo electrónico",
                           placeHolder: "nombre@ejemplo.com")
                 .autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
                 
+//                let tldRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.(com|edu|org|net|gov|io)"
+//                let emailPredicate = NSPredicate(format: "SELF MATCHES %@", tldRegex)
+                if !errorMessageEmail.isEmpty{ //&& !emailPredicate.evaluate(with: email)
+                    Text(errorMessageEmail)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.red)
+                        .font(.subheadline)
+                        .padding(.top, 8)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: /*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+                    
+                }
+                
                 InputView(text: $password,
                           title: "Contraseña",
                           placeHolder: "Ingresa una contraseña",
                           isSecureField: true)
+
+//                let passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$"
+//                let passwordPredicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
+                if !errorMessagePassword.isEmpty { //&& (!passwordPredicate.evaluate(with: password) || password.count <= 5)
+                    Text(errorMessagePassword)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.red)
+                        .font(.subheadline)
+                        .padding(.top, 8)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: /*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+                        
+                }
                 
                 ZStack(alignment: .trailing){
                     InputView(text: $confirmPassword,
@@ -76,32 +116,68 @@ struct RegistrationView: View {
             }
             .padding(30)
             .padding(.top, 12)
-
             
             //Sign Up button
             Button {
                 Task{
-                    try await viewModel.createUser(withEmail: email,                                password: password,                              fullname: fullName)
+                    errorMessageName = ""
+                    errorMessageEmail = ""
+                    errorMessagePassword = ""
+                    errorMessageUserExists = ""
+                    
+                    let tldRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.(com|edu|org|net|gov|io)"
+                    let emailPredicate = NSPredicate(format: "SELF MATCHES %@", tldRegex)
+                    
+                    if !emailPredicate.evaluate(with: email) {
+                        errorMessageEmail = "Formato incorrecto para el correo."
+                    }
+                    let passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$"
+                    let passwordPredicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
+                    
+                    if(!passwordPredicate.evaluate(with: password) || !(password.count > 5)){
+                        errorMessagePassword = "Debe tener: Mínimo una mayúscula, minúscula y un número. Mínimo 6 carácteres"
+                    }
+                    if (fullName.isEmpty || fullName.count > 15){
+                        errorMessageName = "No puede estar vacio, máx. 15 caracteres"
+                    }
+
+                    if errorMessageName.isEmpty && errorMessageEmail.isEmpty && errorMessagePassword.isEmpty{
+                        try await viewModel.createUser(withEmail: email,password: password,fullname: fullName)
+                        
+                        if viewModel.userExists{
+                            errorMessageUserExists = "El correo que intenta registrar ya tiene una cuenta asociada."
+                        }
+                    }
                 }
             } label: {
                 HStack {
                     Text("Registrar")
                         .fontWeight(.semibold)
                         .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
-
+                    
                 }
                 .foregroundColor(.white)
                 .frame(width: UIScreen.main.bounds.width - 32,          height: 48)
             }
             .background(
-                            RoundedRectangle(cornerRadius: 10) // Adjust corner radius as needed
-                            .fill(Color.orange) // Background color of the rectangle
-                            .shadow(color: Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0), radius: 5, x: 0, y: 2) // Shadow parameters
-                        )
+                RoundedRectangle(cornerRadius: 10) // Adjust corner radius as needed
+                    .fill(Color.orange) // Background color of the rectangle
+                    .shadow(color: Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0), radius: 5, x: 0, y: 2) // Shadow parameters
+            )
             .disabled(!FormIsValid)
             .opacity(FormIsValid ? 1.0 : 0.8)
             .cornerRadius(10)
             .padding(.top, 24)
+            
+            if !errorMessageUserExists.isEmpty && viewModel.userExists{
+                Text(errorMessageUserExists)
+                    .frame(width: 320, alignment: .leading)
+                    .foregroundColor(.red)
+                    .font(.subheadline)
+                    .padding(.top, 8)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: /*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+            }
             
             Spacer()
             
@@ -126,8 +202,7 @@ struct RegistrationView: View {
 
 extension RegistrationView: AuthenticationFormProtocol {
     var FormIsValid: Bool {
-        return !email.isEmpty && email.contains("@")
-        && !password.isEmpty && password.count > 5
+        return !email.isEmpty && !password.isEmpty
         && confirmPassword == password
         && !fullName.isEmpty
     }
