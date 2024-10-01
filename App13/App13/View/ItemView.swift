@@ -11,6 +11,7 @@ import SDWebImageSwiftUI
 struct ItemView: View {
     
     var item: Item
+    var favoriteName: String
     var body: some View {
         VStack{
             
@@ -21,12 +22,29 @@ struct ItemView: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 100, height: 100)
                     .clipped()
+
                 
                 VStack(alignment: .leading, spacing: 4){
-                    Text(item.item_name)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
+                    HStack{
+                        Text(item.item_name)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
+                        
+                        if favoriteName == item.item_name {
+                            ZStack {
+                                // Circle background
+                                Circle()
+                                    .fill(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
+                                    .frame(width: 25, height: 25) // Circle size
+
+                                // Smaller star inside the circle
+                                Image(systemName: "star.fill")
+                                    .foregroundColor(.white)  // Star color
+                                    .frame(width: 0.8, height: 0.8) // Star size, smaller than the circle
+                            }
+                        }
+                    }
                     
                     Text(item.item_details)
                         .font(.caption)
