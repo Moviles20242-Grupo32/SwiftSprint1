@@ -45,7 +45,7 @@ class AuthViewModel: ObservableObject {
         
         //checks if the user already exists before creating a new one.
         do {
-            if let user = try await DatabaseManager.shared.fetchUser(byEmail: email) {
+            if let user = try await DatabaseManager.shared.fetchUser(uid: email) {
                 userExists = true
             }else { //user does not exists, proceed to create a new one.
                 

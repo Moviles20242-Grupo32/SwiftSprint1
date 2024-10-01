@@ -35,13 +35,13 @@ struct ItemView: View {
                             ZStack {
                                 // Circle background
                                 Circle()
-                                    .fill(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
+                                    .fill(Color.orange)
                                     .frame(width: 25, height: 25) // Circle size
 
-                                // Smaller star inside the circle
+                                // Star inside the circle
                                 Image(systemName: "star.fill")
                                     .foregroundColor(.white)  // Star color
-                                    .frame(width: 0.8, height: 0.8) // Star size, smaller than the circle
+                                    .scaleEffect(0.5)  // Scale the star relative to its original size
                             }
                         }
                     }

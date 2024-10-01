@@ -70,16 +70,16 @@ class DatabaseManager: ObservableObject {
         }
     }
     
-    // Method to update/set order details
-    func setOrder(for userId: String, details: [[String: Any]], ids: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
-        let db = Firestore.firestore()
-        
-        // Access the "Orders" collection and delete the document for the given userId
-        db.collection("Orders").document(userId).delete { (err) in
-            // Return any error encountered to the completion handler
-            completion(err)
-        }
-    }
+//    // Method to update/set order details
+//    func setOrder(for userId: String, details: [[String: Any]], ids: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
+//        let db = Firestore.firestore()
+//        
+//        // Access the "Orders" collection and delete the document for the given userId
+//        db.collection("Orders").document(userId).delete { (err) in
+//            // Return any error encountered to the completion handler
+//            completion(err)
+//        }
+//    }
         
     // Method to update/set order details
         func setOrder(for userId: String, details: [[String: Any]], ids: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
