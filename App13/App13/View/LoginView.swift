@@ -46,6 +46,13 @@ struct LoginView: View {
                               placeHolder: "nombre@ejemplo.com")
                     .autocapitalization(.none)
                     
+                    if !errorMessage.isEmpty && errorMessage == "Formato incorrecto para el correo."{
+                        Text(errorMessage)
+                            .frame(width: 350, alignment: .leading)
+                            .foregroundColor(.red)
+                            .font(.subheadline)
+                            .padding(.top, 8)
+                    }
 
                     InputView(text: $password,
                               title: "Contraseña",
@@ -62,6 +69,13 @@ struct LoginView: View {
                         
                         if viewModel.incorrectUserPassword{
                             errorMessage = "Correo electrónico o contraseña incorrectos. Por favor intente de nuevo."
+                        }
+                        
+                        let tldRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.(com|edu|org|net|gov|io)"
+                        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", tldRegex)
+                        
+                        if !emailPredicate.evaluate(with: email) {
+                            errorMessage = "Formato incorrecto para el correo."
                         }
                     }
                 } label: {
@@ -86,7 +100,7 @@ struct LoginView: View {
                 .padding(.top, 24)
                 
                 //If user auth failed.
-                if !errorMessage.isEmpty {
+                if !errorMessage.isEmpty && viewModel.incorrectUserPassword == true{
                     Text(errorMessage)
                         .frame(width: 350, alignment: .leading)
                         .foregroundColor(.red)
@@ -119,8 +133,7 @@ struct LoginView: View {
 
 extension LoginView: AuthenticationFormProtocol {
     var FormIsValid: Bool {
-        return !email.isEmpty && email.contains("@")
-        && !password.isEmpty && password.count > 5
+        return !email.isEmpty && !password.isEmpty && password.count > 5
     }
 }
 
