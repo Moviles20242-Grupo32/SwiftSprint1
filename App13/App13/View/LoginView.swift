@@ -100,7 +100,7 @@ struct LoginView: View {
                 .padding(.top, 24)
                 
                 //If user auth failed.
-                if !errorMessage.isEmpty && viewModel.incorrectUserPassword == true{
+                if !errorMessage.isEmpty && errorMessage != "Formato incorrecto para el correo."{
                     Text(errorMessage)
                         .frame(width: 350, alignment: .leading)
                         .foregroundColor(.red)
