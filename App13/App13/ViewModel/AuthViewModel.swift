@@ -16,11 +16,15 @@ protocol AuthenticationFormProtocol {
 
 @MainActor
 class AuthViewModel: ObservableObject {
-    @Published var userSession: FirebaseAuth.User?
-    @Published var currentUser: User?
-    @Published var incorrectUserPassword: Bool = false
-    @Published var userExists: Bool = false
     
+    // Published properties to update UI when user session or state changes
+    @Published var userSession: FirebaseAuth.User? // Tracks current Firebase user session
+    @Published var currentUser: User?   // Stores app-specific user data
+    @Published var incorrectUserPassword: Bool = false // Flag for incorrect login attempts
+    @Published var userExists: Bool = false // Flag to indicate if a user already exists
+    
+    
+    // Initializes user session and fetches user data if logged in
     init(){
         self.userSession = Auth.auth().currentUser
         Task{
@@ -28,6 +32,7 @@ class AuthViewModel: ObservableObject {
         }
     }
     
+    // Signs in the user with email and password, fetches user data if successful
     func signIn(withEmail email: String, password: String) async throws {
         do{
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
@@ -41,15 +46,15 @@ class AuthViewModel: ObservableObject {
         }
     }
     
+    // Creates a new user, checking first if they already exist in the database
     func createUser(withEmail email: String, password: String, fullname: String) async throws {
         
-        //checks if the user already exists before creating a new one.
+        // Checks if the user already exists before creating a new one.
         do {
-            if let user = try await DatabaseManager.shared.fetchUser(uid: email) {
-                userExists = true
-            }else { //user does not exists, proceed to create a new one.
-                
-                do{
+            if (try await DatabaseManager.shared.fetchUser(uid: email)) != nil {
+                userExists = true // User exists
+            }else { // User does not exists, proceed to create a new one.
+                do{ // Creates a new Firebase user and stores user data in the database
                     let result = try await Auth.auth().createUser(withEmail: email, password: password)
                     self.userSession = result.user
                     let user = User(id: result.user.uid, fullname: fullname, email: email)
@@ -64,6 +69,7 @@ class AuthViewModel: ObservableObject {
         }
     }
     
+    // Logs out the current user, clearing session and user data
     func signOut(){
         do{
             try Auth.auth().signOut()
@@ -74,8 +80,9 @@ class AuthViewModel: ObservableObject {
         }
     }
     
+    // Fetches the current user's data from the database
     func fetchUser() async {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard let uid = Auth.auth().currentUser?.uid else { return } //if no active user found, return.
         do {
             // Use DatabaseManager to fetch user
             self.currentUser = try await DatabaseManager.shared.fetchUser(uid: uid)
