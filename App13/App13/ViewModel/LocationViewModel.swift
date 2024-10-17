@@ -17,12 +17,16 @@ class LocationViewModel: ObservableObject {
     
     private var locationManager: LocationManager
     private var cancellables = Set<AnyCancellable>()
+    var locationTimer: DispatchSourceTimer?
     
-    let targetLocation = CLLocation(latitude: 4.6517, longitude: -74.0549) //ejemplo ubicacion
+    let targetLocation = CLLocation(latitude: 4.815681, longitude: -74.049471) //ejemplo ubicacion
+    
+    static let shared = LocationViewModel()
     
     init(locationManager: LocationManager = LocationManager()) {
         self.locationManager = locationManager
         observeLocation()
+        startLocationExtraction()
 //        sendTestNotification()
     }
     
@@ -40,6 +44,18 @@ class LocationViewModel: ObservableObject {
 //            }
 //        }
 //    }
+    
+    func startLocationExtraction() {
+        let queue = DispatchQueue.global(qos: .background)
+        locationTimer = DispatchSource.makeTimerSource(queue: queue)
+        locationTimer?.schedule(deadline: .now(), repeating: 300) // 300 seconds (5 minutes)
+        
+        locationTimer?.setEventHandler { [weak self] in
+            self?.extractLocation()
+        }
+        
+        locationTimer?.resume()
+    }
     
     func extractLocation() {
         guard let location = self.userLocation else { return }

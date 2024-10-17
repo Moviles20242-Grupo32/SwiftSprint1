@@ -21,11 +21,5 @@ struct ContentView: View {
                     .navigationBarBackButtonHidden(true)
             }
         }
-        //AnalyticsView()
     }
-}
-
-#Preview {
-    ContentView()
-        .environmentObject(AuthViewModel())
 }

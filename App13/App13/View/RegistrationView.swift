@@ -197,6 +197,9 @@ struct RegistrationView: View {
         }
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+        .alert(isPresented: $viewModel.showAlert) {
+            Alert(title: Text("Error de conexión"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("OK")))
+        }
     }
 }
 
