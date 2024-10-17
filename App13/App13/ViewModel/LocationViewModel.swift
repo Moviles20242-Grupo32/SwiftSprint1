@@ -11,22 +11,22 @@ import Combine
 import UserNotifications
 
 class LocationViewModel: ObservableObject {
-    // Published properties to track user's location, proximity status, and address
     @Published var userLocation: CLLocation?
     @Published var isWithinProximity: Bool = false
     @Published var userAddress = ""
     
-    // Private properties for location manager and Combine subscriptions
     private var locationManager: LocationManager
     private var cancellables = Set<AnyCancellable>()
+    var locationTimer: DispatchSourceTimer?
     
-    // example location (Universidad de los Andes)
-    let targetLocation = CLLocation(latitude: 4.6517, longitude: -74.0549)
+    let targetLocation = CLLocation(latitude: 4.815681, longitude: -74.049471) //ejemplo ubicacion
     
-    // Initializes the view model with a LocationManager instance and starts observing location changes
+    static let shared = LocationViewModel()
+    
     init(locationManager: LocationManager = LocationManager()) {
         self.locationManager = locationManager
         observeLocation()
+        startLocationExtraction()
 //        sendTestNotification()
     }
     
@@ -45,7 +45,18 @@ class LocationViewModel: ObservableObject {
 //        }
 //    }
     
-    // Extracts user's address from their current location using reverse geocoding
+    func startLocationExtraction() {
+        let queue = DispatchQueue.global(qos: .background)
+        locationTimer = DispatchSource.makeTimerSource(queue: queue)
+        locationTimer?.schedule(deadline: .now(), repeating: 300) // 300 seconds (5 minutes)
+        
+        locationTimer?.setEventHandler { [weak self] in
+            self?.extractLocation()
+        }
+        
+        locationTimer?.resume()
+    }
+    
     func extractLocation() {
         guard let location = self.userLocation else { return }
         
@@ -74,10 +85,9 @@ class LocationViewModel: ObservableObject {
         }
     }
     
-    // Observes changes to the user's location and updates proximity and address accordingly
     func observeLocation() {
         locationManager.$userLocation
-            .throttle(for: .seconds(60), scheduler: DispatchQueue.main, latest: true) //checks location every 60 secs.
+            .throttle(for: .seconds(60), scheduler: DispatchQueue.main, latest: true)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] location in
                 guard let self = self, let location = location else { return }
@@ -88,7 +98,7 @@ class LocationViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    // Checks if the user is within 2km of the target location and sends a notification if true
+    
     func checkProximity(userLocation: CLLocation) {
         let distance = userLocation.distance(from: targetLocation)
         isWithinProximity = distance <= 2000
@@ -98,7 +108,6 @@ class LocationViewModel: ObservableObject {
         }
     }
     
-    // Requests permission for sending notifications
     func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if granted {
@@ -109,7 +118,6 @@ class LocationViewModel: ObservableObject {
         }
     }
     
-    // Sends a notification when the user is near the target location
     func sendNotification() {
         let content = UNMutableNotificationContent()
         content.title = "Estás cerca!"

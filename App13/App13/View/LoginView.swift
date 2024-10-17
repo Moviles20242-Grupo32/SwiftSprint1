@@ -65,8 +65,14 @@ struct LoginView: View {
                 // sign in button
                 Button {
                     Task {
-                        try await viewModel.signIn(withEmail: email,                        password: password)
                         
+                        try await viewModel.signIn(withEmail: email,password: password)
+                        
+//                        print("Conexión \(isConnected)")
+//                        if !isConnected {
+//                            errorMessage = "No hay conexión a internet. No se puede iniciar sesión."
+//                        }
+                       
                         if viewModel.incorrectUserPassword{
                             errorMessage = "Correo electrónico o contraseña incorrectos. Por favor intente de nuevo."
                         }
@@ -77,6 +83,8 @@ struct LoginView: View {
                         if !emailPredicate.evaluate(with: email) {
                             errorMessage = "Formato incorrecto para el correo."
                         }
+                        
+                        
                     }
                 } label: {
                     HStack {
