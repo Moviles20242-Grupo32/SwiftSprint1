@@ -95,6 +95,14 @@ struct ProfileView: View {
                     }
                 }
             }
+            else {
+                ProgressView("Loading user info...")
+                    .onAppear {
+                        Task {
+                            await viewModel.fetchUser()
+                        }
+                    }
+            }
         }
         .background(Color(.systemGray6))
         .navigationBarHidden(true)

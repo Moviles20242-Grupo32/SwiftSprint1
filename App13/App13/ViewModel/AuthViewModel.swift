@@ -27,10 +27,18 @@ class AuthViewModel: ObservableObject {
     // Initializes user session and fetches user data if logged in
     init(){
         self.userSession = Auth.auth().currentUser
+        
+        if let user = Auth.auth().currentUser {
+            print("DEBUG: Auth currentUser UID: \(user.uid)")
+        } else {
+            print("DEBUG: No current user logged in.")
+        }
+        
         Task{
             await fetchUser()
         }
     }
+
     
     // Signs in the user with email and password, fetches user data if successful
     func signIn(withEmail email: String, password: String) async throws {
@@ -58,6 +66,7 @@ class AuthViewModel: ObservableObject {
                     let result = try await Auth.auth().createUser(withEmail: email, password: password)
                     self.userSession = result.user
                     let user = User(id: result.user.uid, fullname: fullname, email: email)
+                    print("Va a crear usuario")
                     try await DatabaseManager.shared.createUser(user: user)
                     await fetchUser()
                 }catch{
@@ -82,7 +91,12 @@ class AuthViewModel: ObservableObject {
     
     // Fetches the current user's data from the database
     func fetchUser() async {
+<<<<<<< Updated upstream
         guard let uid = Auth.auth().currentUser?.uid else { return } //if no active user found, return.
+=======
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        print("Se extrae usuario con id" + uid)
+>>>>>>> Stashed changes
         do {
             // Use DatabaseManager to fetch user
             self.currentUser = try await DatabaseManager.shared.fetchUser(uid: uid)

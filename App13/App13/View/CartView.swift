@@ -201,7 +201,7 @@ struct CartView: View {
         
         synthesizer = AVSpeechSynthesizer()
         
-        let speechUtterance = AVSpeechUtterance(string: "Las cajas disponibles son " + elements)
+        let speechUtterance = AVSpeechUtterance(string: "Las cajas agregadas al carrito son " + elements)
         speechUtterance.voice = AVSpeechSynthesisVoice(language: "es-MX")
         
         synthesizer?.speak(speechUtterance)
