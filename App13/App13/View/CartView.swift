@@ -168,6 +168,7 @@ struct CartView: View {
                     Analytics.logEvent("proceed_to_checkout", parameters: [
                         "timestamp": NSNumber(value: Date().timeIntervalSince1970)
                     ])
+                    print("Actualizando")
                     homeData.updateOrder()
                     
                 }){
@@ -187,6 +188,9 @@ struct CartView: View {
         }
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+        .alert(isPresented: $homeData.showAlert) {
+                    Alert(title: Text("Error de conexión"), message: Text(homeData.alertMessage), dismissButton: .default(Text("OK")))
+                }
     }
     
     func speak(elements: String) {

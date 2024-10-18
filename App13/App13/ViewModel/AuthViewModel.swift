@@ -9,23 +9,50 @@ import Foundation
 import Firebase
 import FirebaseAuth
 import FirebaseFirestore
+import Network
 
 protocol AuthenticationFormProtocol {
     var FormIsValid: Bool {get}
 }
 
+var isConnected: Bool = false
+var currentUser: User?
+
 @MainActor
 class AuthViewModel: ObservableObject {
-    
-    // Published properties to update UI when user session or state changes
-    @Published var userSession: FirebaseAuth.User? // Tracks current Firebase user session
-    @Published var currentUser: User?   // Stores app-specific user data
-    @Published var incorrectUserPassword: Bool = false // Flag for incorrect login attempts
-    @Published var userExists: Bool = false // Flag to indicate if a user already exists
-    
-    
-    // Initializes user session and fetches user data if logged in
-    init(){
+    @Published var userSession: FirebaseAuth.User?
+//    @Published var currentUser: User?
+    @Published var incorrectUserPassword: Bool = false
+    @Published var userExists: Bool = false
+    @Published var HomeModel = HomeViewModel.shared
+    @Published var alertMessage: String = ""
+    @Published var showAlert: Bool = false
+    private var monitor: NWPathMonitor
+    @Published var LocationModel = LocationViewModel.shared
+    static let shared = AuthViewModel()
+
+    init() {
+        
+        self.monitor = NWPathMonitor()
+        let queue = DispatchQueue(label: "MonitorQueue", qos: .userInteractive)
+        monitor.start(queue: queue)
+        let delay: TimeInterval = 2
+        monitor.pathUpdateHandler = { [weak self] path in
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                let newConnectionState = (path.status == .satisfied)
+                if newConnectionState != isConnected {
+                    isConnected = newConnectionState
+                    print("Connection status changed: \(isConnected == true ? "Connected" : "Disconnected")")
+                    self?.HomeModel.fetchData()
+                }
+                
+                if isConnected{
+                    self?.LocationModel.extractLocation()
+                }
+            }
+        }
+        
+        
         self.userSession = Auth.auth().currentUser
         
         if let user = Auth.auth().currentUser {
@@ -42,7 +69,8 @@ class AuthViewModel: ObservableObject {
     
     // Signs in the user with email and password, fetches user data if successful
     func signIn(withEmail email: String, password: String) async throws {
-        do{
+        
+        do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             self.userSession = result.user
             await fetchUser()
@@ -57,7 +85,14 @@ class AuthViewModel: ObservableObject {
     // Creates a new user, checking first if they already exist in the database
     func createUser(withEmail email: String, password: String, fullname: String) async throws {
         
-        // Checks if the user already exists before creating a new one.
+        guard isConnected else {
+            // Show alert if there's no internet connection
+            alertMessage = "No hay conexión a internet. No se puede registrar el usuario."
+            showAlert = true
+            return
+        }
+        
+        //checks if the user already exists before creating a new one.
         do {
             if (try await DatabaseManager.shared.fetchUser(uid: email)) != nil {
                 userExists = true // User exists
@@ -78,28 +113,32 @@ class AuthViewModel: ObservableObject {
         }
     }
     
-    // Logs out the current user, clearing session and user data
-    func signOut(){
-        do{
+    func signOut() {
+        guard isConnected else {
+                // Show alert if there's no internet connection
+                alertMessage = "No hay conexión a internet. No se puede cerrar sesión."
+                showAlert = true
+                return
+            }
+            
+        do {
             try Auth.auth().signOut()
             self.userSession = nil
-            self.currentUser = nil
-        } catch{
+            currentUser = nil
+        } catch {
             print("DEBUG: Failed to sign out with error \(error.localizedDescription)")
         }
     }
+        
     
     // Fetches the current user's data from the database
     func fetchUser() async {
-<<<<<<< Updated upstream
-        guard let uid = Auth.auth().currentUser?.uid else { return } //if no active user found, return.
-=======
         guard let uid = Auth.auth().currentUser?.uid else { return }
         print("Se extrae usuario con id" + uid)
->>>>>>> Stashed changes
+
         do {
             // Use DatabaseManager to fetch user
-            self.currentUser = try await DatabaseManager.shared.fetchUser(uid: uid)
+            currentUser = try await DatabaseManager.shared.fetchUser(uid: uid)
         } catch {
             print("DEBUG: Failed to fetch user with error \(error.localizedDescription)")
         }

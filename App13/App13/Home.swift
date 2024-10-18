@@ -12,11 +12,11 @@ import FirebaseAnalytics
 
 struct Home: View {
     @State private var synthesizer: AVSpeechSynthesizer?
-    @StateObject var HomeModel = HomeViewModel()
+    @StateObject var HomeModel = HomeViewModel.shared
     @State private var searchDebounceTimer: AnyCancellable?
     @State private var typingStartTime: TimeInterval?
     @State var searchStartTime: TimeInterval?
-    @StateObject var LocationModel = LocationViewModel()
+    @StateObject var LocationModel = LocationViewModel.shared
     
     var body: some View {
         
@@ -142,6 +142,8 @@ struct Home: View {
                                                 "search_term": finalValue
                                             ])
                                             print("Event logged: search_term = \(finalValue)")
+                                            
+                                            HomeModel.saveSearchUse(finalValue: finalValue)
                                         }
                                     }
                             }
@@ -256,10 +258,4 @@ struct Home: View {
         
         synthesizer?.speak(speechUtterance)
     }
-}
-
-
-#Preview {
-    Home(HomeModel: HomeViewModel())
-        .environmentObject(AuthViewModel())
 }

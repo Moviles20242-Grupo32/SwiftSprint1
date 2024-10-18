@@ -19,14 +19,17 @@ class LocationViewModel: ObservableObject {
     // Private properties for location manager and Combine subscriptions
     private var locationManager: LocationManager
     private var cancellables = Set<AnyCancellable>()
+    var locationTimer: DispatchSourceTimer?
     
-    // example location (Universidad de los Andes)
-    let targetLocation = CLLocation(latitude: 4.6517, longitude: -74.0549)
+    let targetLocation = CLLocation(latitude: 4.815681, longitude: -74.049471) //ejemplo ubicacion
+    
+    static let shared = LocationViewModel()
     
     // Initializes the view model with a LocationManager instance and starts observing location changes
     init(locationManager: LocationManager = LocationManager()) {
         self.locationManager = locationManager
         observeLocation()
+        startLocationExtraction()
 //        sendTestNotification()
     }
     
@@ -45,7 +48,18 @@ class LocationViewModel: ObservableObject {
 //        }
 //    }
     
-    // Extracts user's address from their current location using reverse geocoding
+    func startLocationExtraction() {
+        let queue = DispatchQueue.global(qos: .background)
+        locationTimer = DispatchSource.makeTimerSource(queue: queue)
+        locationTimer?.schedule(deadline: .now(), repeating: 300) // 300 seconds (5 minutes)
+        
+        locationTimer?.setEventHandler { [weak self] in
+            self?.extractLocation()
+        }
+        
+        locationTimer?.resume()
+    }
+    
     func extractLocation() {
         guard let location = self.userLocation else { return }
         
