@@ -183,33 +183,34 @@ class DatabaseManager: ObservableObject {
     // Async method to fetch a user document from Firestore by user ID
     func fetchUser(uid: String) async throws -> User? {
         print("En Database manager" + uid)
-                do {
-                    // Attempt to fetch the document from Firestore
-                    let snapshot = try await db.collection("users").document(uid).getDocument()
+        do {
+            // Attempt to fetch the document from Firestore
+            let snapshot = try await db.collection("users").document(uid).getDocument()
 
-                    // Check if the document exists
-                    if snapshot.exists {
-                        // Log the raw data returned from Firestore
-                        let data = snapshot.data()
-                        print("DEBUG: Fetched user data: \(String(describing: data))")
-                        
-                        // Attempt to decode the document into the User object
-                        return try snapshot.data(as: User.self)
-                    } else {
-                        // If no document exists for the given UID
-                        print("DEBUG: No document found for user UID: \(uid)")
-                        return nil
-                    }
-                } catch {
-                    // Log any errors that occur during fetching or decoding
-                    print("DEBUG: Error fetching user data: \(error)")
-                    throw error
-                }
+            // Check if the document exists
+            if snapshot.exists {
+                // Log the raw data returned from Firestore
+                let data = snapshot.data()
+                print("DEBUG: Fetched user data: \(String(describing: data))")
+                
+                // Attempt to decode the document into the User object
+                return try snapshot.data(as: User.self)
+            } else {
+                // If no document exists for the given UID
+                print("DEBUG: No document found for user UID: \(uid)")
+                return nil
+            }
+        } catch {
+            // Log any errors that occur during fetching or decoding
+            print("DEBUG: Error fetching user data: \(error)")
+            throw error
+        }
     }
+
 
     // Async method to create a new user in the "users" collection
     func createUser(user: User) async throws {
-        print("Usuario a crear")
+        print("Creando usuario")
         // Encode the User object to a Firestore-compatible format
         let encodedUser = try Firestore.Encoder().encode(user)
         // Save the encoded user data to Firestore
@@ -232,6 +233,7 @@ class DatabaseManager: ObservableObject {
                 print("Search use successfully saved!")
             }
         }
+        print("Se creó usuario con id:" + user.id)
     }
 
 }

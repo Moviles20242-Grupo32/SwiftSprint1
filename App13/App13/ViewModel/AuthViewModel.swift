@@ -61,11 +61,13 @@ class AuthViewModel: ObservableObject {
             print("DEBUG: No current user logged in.")
         }
         
-        Task {
+        Task{
             await fetchUser()
         }
     }
+
     
+    // Signs in the user with email and password, fetches user data if successful
     func signIn(withEmail email: String, password: String) async throws {
         
         do {
@@ -80,6 +82,7 @@ class AuthViewModel: ObservableObject {
         }
     }
     
+    // Creates a new user, checking first if they already exist in the database
     func createUser(withEmail email: String, password: String, fullname: String) async throws {
         
         guard isConnected else {
@@ -91,11 +94,10 @@ class AuthViewModel: ObservableObject {
         
         //checks if the user already exists before creating a new one.
         do {
-            if let user = try await DatabaseManager.shared.fetchUser(uid: email) {
-                userExists = true
-            }else { //user does not exists, proceed to create a new one.
-                
-                do{
+            if (try await DatabaseManager.shared.fetchUser(uid: email)) != nil {
+                userExists = true // User exists
+            }else { // User does not exists, proceed to create a new one.
+                do{ // Creates a new Firebase user and stores user data in the database
                     let result = try await Auth.auth().createUser(withEmail: email, password: password)
                     self.userSession = result.user
                     let user = User(id: result.user.uid, fullname: fullname, email: email)
@@ -129,9 +131,11 @@ class AuthViewModel: ObservableObject {
     }
         
     
+    // Fetches the current user's data from the database
     func fetchUser() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         print("Se extrae usuario con id" + uid)
+
         do {
             // Use DatabaseManager to fetch user
             currentUser = try await DatabaseManager.shared.fetchUser(uid: uid)

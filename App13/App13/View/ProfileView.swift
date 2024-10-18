@@ -103,6 +103,7 @@ struct ProfileView: View {
                             }
                         }
                 }
+
         }
         .background(Color(.systemGray6))
         .navigationBarHidden(true)
