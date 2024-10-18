@@ -29,6 +29,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     //ItemData
     @Published var items: [Item] = []
     @Published var filtered: [Item] = []
+    private var allItems: [Item] = []
     @Published var favorite: Item? = nil
     
     @Published var cartItems: [Cart] = []
@@ -281,6 +282,14 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
 
     func saveSearchUse(finalValue: String) {
         DatabaseManager.shared.saveSearchUse(finalValue: finalValue)
+    }
+    
+    func filterHighRatedItems(showHighRated: Bool) {
+        if showHighRated {
+            filtered = items.filter { $0.item_ratings == "4" }
+        } else {
+            filtered = items // Reset to show all items
+        }
     }
 
     

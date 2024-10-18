@@ -17,6 +17,7 @@ struct Home: View {
     @State private var typingStartTime: TimeInterval?
     @State var searchStartTime: TimeInterval?
     @StateObject var LocationModel = LocationViewModel.shared
+    @State private var showHighRatedItems = false
     
     var body: some View {
         
@@ -158,6 +159,21 @@ struct Home: View {
                     .padding(.top,10)
                     
                     
+                    Button(action: {
+                        // Toggle the filter state
+                        showHighRatedItems.toggle()
+                        
+                        // Call the filter function in the HomeViewModel
+                        HomeModel.filterHighRatedItems(showHighRated: showHighRatedItems)
+                    }) {
+                        Text(showHighRatedItems ? "Todas las cajas" : "Mostrar rating alto")
+                            .font(.headline)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding(3)
                     
                     if HomeModel.items.isEmpty{
                         
@@ -239,6 +255,14 @@ struct Home: View {
                 }
             }
         })
+    }
+    
+    var filteredItems: [Item] {
+        if showHighRatedItems {
+            return HomeModel.filtered.filter { $0.item_ratings == "4" || $0.item_ratings == "5" }
+        } else {
+            return HomeModel.filtered
+        }
     }
     
     func speak(elements: String) {
