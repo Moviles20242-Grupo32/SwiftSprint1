@@ -44,8 +44,8 @@ struct RegistrationView: View {
             //form fields
             VStack(spacing: 24){
                 InputView(text: $fullName,
-                          title: "Usuario",
-                          placeHolder: "Ingresa un usuario")
+                          title: "Nombre",
+                          placeHolder: "Ingresa tu nombre")
                 
                 if !errorMessageName.isEmpty { //&& (fullName.count > 15 || fullName.isEmpty)
                     Text(errorMessageName)
@@ -146,7 +146,7 @@ struct RegistrationView: View {
                         
                         if viewModel.userExists{
                             errorMessageUserExists = "El correo que intenta registrar ya tiene una cuenta asociada."
-                        }
+                        }//no muestra mensaje
                     }
                 }
             } label: {

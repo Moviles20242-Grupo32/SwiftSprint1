@@ -171,7 +171,7 @@ struct CartView: View {
                     homeData.updateOrder()
                     
                 }){
-                    Text(homeData.ordered ? "Cancel Order": "Check out")
+                    Text("Check out")
                         .font(.title2)
                         .fontWeight(.heavy)
                         .foregroundColor(.white)

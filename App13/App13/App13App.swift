@@ -24,8 +24,6 @@ struct App13App: App {
                 .environmentObject(authViewModel)
         }
     }
-    
-    
 }
 
 class AppDelegate: NSObject, UIApplicationDelegate {
