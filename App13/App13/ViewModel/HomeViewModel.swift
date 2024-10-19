@@ -267,11 +267,14 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                     } ?? 0
                     
                     // Toggle the isAdded state
-                    items[index].isAdded.toggle()
-                    filtered[filteredIndex].isAdded.toggle()
+                    items[index].toggleIsAdded()
                     
+                    if items[index].id != filtered[filteredIndex].id {
+                        filtered[filteredIndex].toggleIsAdded()
+                    }
                 }
                 
+                CartCache.shared.clearCache()
                 cartItems.removeAll()
             }
             else{
