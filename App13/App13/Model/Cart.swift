@@ -7,11 +7,26 @@
 
 import SwiftUI
 
-struct Cart: Identifiable {
+class Cart: Identifiable, ObservableObject {
     
     var id = UUID().uuidString
-    var item: Item
-    var quantity: Int
+    @Published var item: Item
+    @Published var quantity: Int
+    
+    init(item: Item, quantity: Int) {
+        self.item = item
+        self.quantity = quantity
+    }
+    
+    func incrementQuantity() -> Cart {
+        quantity += 1
+        return self
+    }
+    
+    func decrementQuantity() -> Cart{
+        quantity -= 1
+        return self
+    }
 }
 
 
