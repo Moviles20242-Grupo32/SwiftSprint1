@@ -27,7 +27,7 @@ struct ProfileView: View {
                 Spacer()
                     .frame(width: 300)
             }
-            if let user = viewModel.currentUser {
+            if let user = currentUser {
                 List {
                     Section {
                         HStack {
@@ -95,14 +95,21 @@ struct ProfileView: View {
                     }
                 }
             }
+            else {
+                    ProgressView("Loading user info...")
+                        .onAppear {
+                            Task {
+                                await viewModel.fetchUser()
+                            }
+                        }
+                }
+
         }
         .background(Color(.systemGray6))
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+        .alert(isPresented: $viewModel.showAlert) {
+            Alert(title: Text("Error"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("OK")))
+        }
     }
-}
-
-#Preview {
-    ProfileView()
-        .environmentObject(AuthViewModel())
 }

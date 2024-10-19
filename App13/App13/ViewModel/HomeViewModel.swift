@@ -36,6 +36,18 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     @State private var synthesizer: AVSpeechSynthesizer?
     
+    @Published var showAlert = false
+    @Published var alertMessage = ""
+    
+    static let shared = HomeViewModel()
+
+    override private init() {
+        super.init() // Call the super init first
+        locationManager.delegate = self
+        locationManager.requestWhenInUseAuthorization()
+        
+    }
+    
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch manager.authorizationStatus {
         case .authorizedWhenInUse:
@@ -95,18 +107,32 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     }
     
     func fetchData() {
-            DatabaseManager.shared.fetchItems { [weak self] (items, error) in
-                if let error = error {
-                    print("Error fetching items: \(error)")
-                    return
-                }
-                
-                if let items = items {
+        
+        guard isConnected else {
+            DispatchQueue.main.async {
+                // No internet connection
+                self.items = []
+                self.filtered = []
+                self.favorite = nil
+                print("No internet connection. Items, filtered, and favorite are set to nil.")
+            }
+            return
+        }
+        
+        DatabaseManager.shared.fetchItems { [weak self] (items, error) in
+            if let error = error {
+                print("Error fetching items: \(error.localizedDescription)")
+                return
+            }
+            
+            if let items = items {
+                DispatchQueue.main.async {
                     self?.items = items
                     self?.filtered = items
                     self?.favorite = self?.getFavorite()
                 }
             }
+        }
     }
     
     func filterData(){
@@ -153,7 +179,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         
         return isCartIndex ? cartIndex : index
     }
-    
+
     func calculateTotalPrice()->String{
         
         var price : Float = 0
@@ -173,51 +199,59 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     }
     
     func updateOrder() {
+        // Adding a delay of 1 second before executing the rest of the code
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+            guard let self = self else { return }
+            
+            if isConnected {
+              
+               if cartItems.isEmpty {
+            
+                  let alertController = UIAlertController(
+                      title: "Carrito vacío",
+                      message: "Añada artículos al carrito para realizar su orden ",
+                      preferredStyle: .alert
+                  )
+
+                  // Add an OK button to the alert
+                  let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                  alertController.addAction(okAction)
+
+                  // Present the alert
+                  if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+                      viewController.present(alertController, animated: true, completion: nil)
+                  }
+
+                  return
+
+              }
         
-        if cartItems.isEmpty {
-            
-            let alertController = UIAlertController(
-                title: "Carrito vacío",
-                message: "Añada artículos al carrito para realizar su orden ",
-                preferredStyle: .alert
-            )
-            
-            // Add an OK button to the alert
-            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-            alertController.addAction(okAction)
-            
-            // Present the alert
-            if let viewController = UIApplication.shared.keyWindow?.rootViewController {
-                viewController.present(alertController, animated: true, completion: nil)
-            }
-            
-            return
-            
-        }
-        
-        let userId = Auth.auth().currentUser!.uid
-            
-        var details: [[String: Any]] = []
-        var items_ids: [[String: Any]] = []
-        
-        cartItems.forEach { cart in
-            details.append([
-                "item_name": cart.item.item_name,
-                "item_quantity": cart.quantity,
-                "item_cost": cart.item.item_cost
-            ])
-            
-            items_ids.append([
-                "id":cart.item.id,
-                "num":cart.quantity
-            ])
-        }
-            
-        // Call DatabaseManager to set the order
-        DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)) { error in
-                if let error = error {
-                    print("Error setting order: \(error)")
+              let userId = Auth.auth().currentUser!.uid
+
+              var details: [[String: Any]] = []
+              var items_ids: [[String: Any]] = []
+
+              cartItems.forEach { cart in
+                  details.append([
+                      "item_name": cart.item.item_name,
+                      "item_quantity": cart.quantity,
+                      "item_cost": cart.item.item_cost
+                  ])
+
+                  items_ids.append([
+                      "id":cart.item.id,
+                      "num":cart.quantity
+                  ])
+              }
+
+              // Call DatabaseManager to set the order
+              DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)) { error in
+                      if let error = error {
+                          print("Error setting order: \(error)")
                 }
+            } else {
+                self.alertMessage = "No hay conexión a internet. No se puede actualizar la orden."
+                self.showAlert = true
             }
         print(userId)
         
@@ -232,10 +266,11 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             filtered[filteredIndex].isAdded.toggle()
             
         }
+
         cartItems.removeAll()
     }
 
-    
+
         
     func calculateTotalPrice() -> NSNumber {
         // Assuming there's logic here to calculate total price
@@ -246,8 +281,9 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         return items.max(by: { $0.times_ordered < $1.times_ordered })
     }
 
-        
-        
+    func saveSearchUse(finalValue: String) {
+        DatabaseManager.shared.saveSearchUse(finalValue: finalValue)
+    }
 
     
 }

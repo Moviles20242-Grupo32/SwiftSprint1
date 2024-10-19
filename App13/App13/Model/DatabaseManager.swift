@@ -7,8 +7,10 @@
 
 import SwiftUI
 import FirebaseFirestore
+import Network
 
 // DatabaseManager class to handle Firestore operations
+
 class DatabaseManager: ObservableObject {
     
     // Singleton instance of DatabaseManager
@@ -17,9 +19,15 @@ class DatabaseManager: ObservableObject {
     // Firestore instance, wrapped with @Published to observe changes
     @Published var db: Firestore
     
+    @Published var viewModel = AuthViewModel.shared
+    
     // Private initializer to enforce the singleton pattern
     private init() {
         db = Firestore.firestore()
+        
+//        let settings = FirestoreSettings()
+//        settings.isPersistenceEnabled = true // Enable offline persistence
+//        db.settings = settings
     }
 
     // Method to fetch items from the "Items" collection in Firestore
@@ -36,7 +44,8 @@ class DatabaseManager: ObservableObject {
             
             // If the snapshot is nil, return nil items
             guard let itemData = snap else {
-                completion(nil, nil)
+                let customError = NSError(domain: "com.example.database", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unable to access the Items collection."])
+                completion(nil, customError)
                 return
             }
             
@@ -60,6 +69,52 @@ class DatabaseManager: ObservableObject {
             completion(items, nil)
         }
     }
+    
+//func fetchItems(completion: @escaping ([Item]?, Error?) -> Void) {
+//    
+//    let monitor = NWPathMonitor()
+//    let queue = DispatchQueue.global(qos: .background)
+//    // Check network connectivity before fetching data
+//    print("Im in")
+//    monitor.pathUpdateHandler = { path in
+//        print("Estoy en path")
+//        if path.status == .satisfied {
+//            print("Ya más cerca")
+//            // Internet connection is available, proceed with data fetching
+//            self.db.collection("Items").getDocuments { (snap, err) in
+//                
+//                if let err = err {
+//                    completion(nil, err)
+//                    return
+//                }
+//                
+//                guard let itemData = snap else {
+//                    completion(nil, nil)
+//                    return
+//                }
+//                
+//                let items = itemData.documents.compactMap { (doc) -> Item? in
+//                    let id = doc.documentID
+//                    let name = doc.get("item_name") as? String ?? ""
+//                    let cost = doc.get("item_cost") as? NSNumber ?? 0
+//                    let ratings = doc.get("item_ratings") as? String ?? ""
+//                    let image = doc.get("item_image") as? String ?? ""
+//                    let details = doc.get("item_details") as? String ?? ""
+//                    let times = doc.get("times_ordered") as? Int ?? 0
+//                    
+//                    return Item(id: id, item_name: name, item_cost: cost, item_details: details, item_image: image, item_ratings: ratings, times_ordered: times)
+//                }
+//                completion(items, nil)
+//            }
+//        } else {
+//            print("morí")
+//            // No internet connection
+//            let noInternetError = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No internet connection. Please try again later."])
+//            completion(nil, noInternetError)
+//        }
+//    }
+//}
+    
     
     // Method to delete an order for a specific user based on userId
     func deleteOrder(for userId: String, completion: @escaping (Error?) -> Void) {
@@ -128,18 +183,57 @@ class DatabaseManager: ObservableObject {
     
     // Async method to fetch a user document from Firestore by user ID
     func fetchUser(uid: String) async throws -> User? {
-        // Fetch the document from the "users" collection
-        let snapshot = try await db.collection("users").document(uid).getDocument()
-        // Decode the document into a User object
-        return try snapshot.data(as: User.self)
+        print("En Database manager" + uid)
+        do {
+            // Attempt to fetch the document from Firestore
+            let snapshot = try await db.collection("users").document(uid).getDocument()
+
+            // Check if the document exists
+            if snapshot.exists {
+                // Log the raw data returned from Firestore
+                let data = snapshot.data()
+                print("DEBUG: Fetched user data: \(String(describing: data))")
+                
+                // Attempt to decode the document into the User object
+                return try snapshot.data(as: User.self)
+            } else {
+                // If no document exists for the given UID
+                print("DEBUG: No document found for user UID: \(uid)")
+                return nil
+            }
+        } catch {
+            // Log any errors that occur during fetching or decoding
+            print("DEBUG: Error fetching user data: \(error)")
+            throw error
+        }
     }
+
 
     // Async method to create a new user in the "users" collection
     func createUser(user: User) async throws {
+        print("Creando usuario")
         // Encode the User object to a Firestore-compatible format
         let encodedUser = try Firestore.Encoder().encode(user)
         // Save the encoded user data to Firestore
         try await db.collection("users").document(user.id).setData(encodedUser)
+        print("Usuario creado")
+    }
+    
+    func saveSearchUse(finalValue: String) {
+        let timestamp = Timestamp()
+        let data: [String: Any] = [
+            "finalValue": finalValue,
+            "timestamp": timestamp,
+            "userId": currentUser?.id as Any
+        ]
+
+        db.collection("searchUse").addDocument(data: data) { error in
+            if let error = error {
+                print("Error saving search use: \(error)")
+            } else {
+                print("Search use successfully saved!")
+            }
+        }
     }
 
 }
