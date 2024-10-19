@@ -21,7 +21,7 @@ class LocationViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     var locationTimer: DispatchSourceTimer?
     
-    let targetLocation = CLLocation(latitude: 4.815681, longitude: -74.049471) //ejemplo ubicacion
+    let targetLocation = CLLocation(latitude: 4.6026, longitude: -74.0661) //ejemplo ubicacion
     
     static let shared = LocationViewModel()
     

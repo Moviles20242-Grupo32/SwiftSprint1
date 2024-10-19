@@ -233,7 +233,6 @@ class DatabaseManager: ObservableObject {
                 print("Search use successfully saved!")
             }
         }
-        print("Se creó usuario con id:" + user.id)
     }
 
 }
