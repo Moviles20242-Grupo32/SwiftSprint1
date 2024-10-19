@@ -45,6 +45,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         super.init() // Call the super init first
         locationManager.delegate = self
         locationManager.requestWhenInUseAuthorization()
+        loadCartItems() // load cart items saved in cache.
         
     }
     
@@ -151,18 +152,24 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         } ?? 0
         
         // Toggle the isAdded state
-        items[index].isAdded.toggle()
-        filtered[filteredIndex].isAdded.toggle()
-
+        items[index].toggleIsAdded()
+        if items[index].id != filtered[filteredIndex].id { //is this necessary?
+            filtered[filteredIndex].toggleIsAdded()
+        }
+        
         // Ensure favorite is updated if it's the same item
 //        if favorite?.id == item.id {
 //            favorite?.isAdded = items[index].isAdded
 //        }
 
-        if items[index].isAdded {
-            cartItems.append(Cart(item: items[index], quantity: 1))
-        } else {
-            cartItems.remove(at: getIndex(item: item, isCartIndex: true))
+        // Adds the added item to the cartitems and the cache.
+        if  items[index].isAdded {
+            let newCartItem = Cart(item: items[index], quantity: 1)
+            cartItems.append(newCartItem)
+            CartCache.shared.addCartItem(newCartItem) // Cache the item
+        } else { //removes de item from the cart and the cache.
+            let removedElement = cartItems.remove(at: getIndex(item: item, isCartIndex: true))
+            CartCache.shared.removeCartItem(byId: removedElement.id)
         }
         
     }
@@ -288,6 +295,30 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     func saveSearchUse(finalValue: String) {
         DatabaseManager.shared.saveSearchUse(finalValue: finalValue)
     }
-
     
+    //Function to increment or decrement the quantity to be ordered of an item in the cart.
+    func incrementDecrementItemQuantity(index: Int, operation: String){
+        
+        if operation == "+"{
+            let modifiedCart = self.cartItems[index].incrementQuantity()
+            self.cartItems[index] = modifiedCart
+        }
+        else if operation == "-" {
+            let modifiedCart2 = self.cartItems[index].decrementQuantity()
+            self.cartItems[index] = modifiedCart2        }
+    }
+    
+    // Function to retrieve cart items from the cache
+    func loadCartItems() {
+        // Load items from cache
+        for cartItem in CartCache.shared.getAllCartItems() {
+            cartItems.append(cartItem)
+        }
+    }
+    
+    // Function to clear the cart
+    func clearCart() {
+        cartItems.removeAll()
+        CartCache.shared.clearCache()
+    }
 }

@@ -12,7 +12,7 @@ import FirebaseAnalytics
 
 struct CartView: View {
     
-    @ObservedObject var homeData: HomeViewModel
+    @StateObject var homeData = HomeViewModel.shared
     @State private var synthesizer: AVSpeechSynthesizer?
     @Environment(\.presentationMode) var present
     var initialTime: TimeInterval
@@ -92,7 +92,7 @@ struct CartView: View {
                                     Spacer(minLength: 0)
                                     
                                     Button(action: {
-                                        if cart.quantity > 1 {homeData.cartItems[homeData.getIndex(item: cart.item, isCartIndex: true)].quantity -= 1}
+                                        if cart.quantity > 1 {homeData.incrementDecrementItemQuantity(index: homeData.getIndex(item: cart.item, isCartIndex: true), operation: "-")}
                                     }){
                                         Image(systemName: "minus")
                                             .font(.system(size: 16, weight: .heavy))
@@ -107,7 +107,7 @@ struct CartView: View {
                                         .background(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0).opacity(0.06))
                                     
                                     Button(action: {
-                                        homeData.cartItems[homeData.getIndex(item: cart.item, isCartIndex: true)].quantity += 1
+                                        homeData.incrementDecrementItemQuantity(index: homeData.getIndex(item: cart.item, isCartIndex: true), operation: "+")
                                     }){
                                         
                                         Image(systemName: "plus")
@@ -128,7 +128,9 @@ struct CartView: View {
                                 homeData.items[itemIndex].isAdded = false
                                 homeData.filtered[itemIndex].isAdded = false
                                 
+                                CartCache.shared.removeCartItem(byId: homeData.cartItems[index].id)
                                 homeData.cartItems.remove(at: index)
+                                
                             }){
                                 Text("Eliminar")
                                     .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255))

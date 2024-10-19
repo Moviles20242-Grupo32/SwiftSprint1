@@ -66,7 +66,6 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    
     // Signs in the user with email and password, fetches user data if successful
     func signIn(withEmail email: String, password: String) async throws {
         
@@ -82,7 +81,6 @@ class AuthViewModel: ObservableObject {
         }
     }
     
-    // Creates a new user, checking first if they already exist in the database
     func createUser(withEmail email: String, password: String, fullname: String) async throws {
         
         guard isConnected else {
@@ -131,7 +129,6 @@ class AuthViewModel: ObservableObject {
     }
         
     
-    // Fetches the current user's data from the database
     func fetchUser() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         print("Se extrae usuario con id" + uid)

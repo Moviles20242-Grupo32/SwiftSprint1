@@ -62,7 +62,7 @@ class DatabaseManager: ObservableObject {
                 let times = doc.get("times_ordered") as! Int
                 
                 // Create and return an Item object
-                return Item(id: id, item_name: name, item_cost: cost, item_details: details, item_image: image, item_ratings: ratings, times_ordered: times)
+                return Item(id: id, item_name: name, item_cost: cost, item_details: details, item_image: image, item_ratings: ratings, times_ordered: times, isAdded: false)
             }
             
             // Pass the parsed items to the completion handler
