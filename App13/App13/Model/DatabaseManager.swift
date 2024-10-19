@@ -137,48 +137,49 @@ class DatabaseManager: ObservableObject {
 //    }
         
     // Method to update/set order details
-        func setOrder(for userId: String, details: [[String: Any]], ids: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
-            let db = Firestore.firestore()
+    func setOrder(for userId: String, details: [[String: Any]], ids: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
+        let db = Firestore.firestore()
             
-            // Update or set the order details in the "Orders" collection for the userId
-            db.collection("Orders").document(userId).setData([
-                "ordered_food": details,
-                "total_cost": totalCost,
-                "location": location
-            ]) { (err) in
-                // Return any error encountered to the completion handler
-                completion(err)
-            }
+        // Update or set the order details in the "Orders" collection for the userId
+        db.collection("Orders").document(userId).setData([
+            "ordered_food": details,
+            "total_cost": totalCost,
+            "location": location,
+            "user_id": userId
+        ]) { (err) in
+            // Return any error encountered to the completion handler
+            completion(err)
+        }
             
             
-            // Iterate through each item ID and update 'times_ordered'
-            ids.forEach { id in
-                let itemId = id["id"] as? String ?? "Unknown"
-                let quantity = id["num"] as? Int ?? 0
-                
-                // Fetch the current 'times_ordered' value
-                db.collection("Items").document(itemId).getDocument { (document, error) in
-                    if let document = document, document.exists {
-                        let currentTimesOrdered = document.data()?["times_ordered"] as? Int ?? 0
-                        
-                        // Update 'times_ordered' by adding the incoming quantity
-                        db.collection("Items").document(itemId).updateData([
-                            "times_ordered": currentTimesOrdered + quantity
-                        ]) { err in
-                            if let err = err {
-                                print("Error updating times_ordered: \(err)")
-                            } else {
-                                print("Successfully updated times_ordered for item \(itemId)")
-                            }
+        // Iterate through each item ID and update 'times_ordered'
+        ids.forEach { id in
+            let itemId = id["id"] as? String ?? "Unknown"
+            let quantity = id["num"] as? Int ?? 0
+            
+            // Fetch the current 'times_ordered' value
+            db.collection("Items").document(itemId).getDocument { (document, error) in
+                if let document = document, document.exists {
+                    let currentTimesOrdered = document.data()?["times_ordered"] as? Int ?? 0
+                    
+                    // Update 'times_ordered' by adding the incoming quantity
+                    db.collection("Items").document(itemId).updateData([
+                        "times_ordered": currentTimesOrdered + quantity
+                    ]) { err in
+                        if let err = err {
+                            print("Error updating times_ordered: \(err)")
+                        } else {
+                            print("Successfully updated times_ordered for item \(itemId)")
                         }
-                    } else {
-                        print("Document does not exist for item \(itemId)")
                     }
+                } else {
+                    print("Document does not exist for item \(itemId)")
                 }
             }
-            
-            
         }
+            
+            
+    }
     
     // Async method to fetch a user document from Firestore by user ID
     func fetchUser(uid: String) async throws -> User? {
