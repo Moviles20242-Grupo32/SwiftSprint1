@@ -204,70 +204,74 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             guard let self = self else { return }
             
             if isConnected {
-              
-               if cartItems.isEmpty {
-            
-                  let alertController = UIAlertController(
-                      title: "Carrito vacío",
-                      message: "Añada artículos al carrito para realizar su orden ",
-                      preferredStyle: .alert
-                  )
-
-                  // Add an OK button to the alert
-                  let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-                  alertController.addAction(okAction)
-
-                  // Present the alert
-                  if let viewController = UIApplication.shared.keyWindow?.rootViewController {
-                      viewController.present(alertController, animated: true, completion: nil)
-                  }
-
-                  return
-
-              }
-        
-              let userId = Auth.auth().currentUser!.uid
-
-              var details: [[String: Any]] = []
-              var items_ids: [[String: Any]] = []
-
-              cartItems.forEach { cart in
-                  details.append([
-                      "item_name": cart.item.item_name,
-                      "item_quantity": cart.quantity,
-                      "item_cost": cart.item.item_cost
-                  ])
-
-                  items_ids.append([
-                      "id":cart.item.id,
-                      "num":cart.quantity
-                  ])
-              }
-
-              // Call DatabaseManager to set the order
-              DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)) { error in
-                      if let error = error {
-                          print("Error setting order: \(error)")
+                
+                if cartItems.isEmpty {
+                    
+                    let alertController = UIAlertController(
+                        title: "Carrito vacío",
+                        message: "Añada artículos al carrito para realizar su orden ",
+                        preferredStyle: .alert
+                    )
+                    
+                    // Add an OK button to the alert
+                    let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                    alertController.addAction(okAction)
+                    
+                    // Present the alert
+                    if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+                        viewController.present(alertController, animated: true, completion: nil)
+                    }
+                    
+                    return
+                    
                 }
-            } else {
+                
+                let userId = Auth.auth().currentUser!.uid
+                
+                var details: [[String: Any]] = []
+                var items_ids: [[String: Any]] = []
+                
+                cartItems.forEach { cart in
+                    details.append([
+                        "item_name": cart.item.item_name,
+                        "item_quantity": cart.quantity,
+                        "item_cost": cart.item.item_cost
+                    ])
+                    
+                    items_ids.append([
+                        "id":cart.item.id,
+                        "num":cart.quantity
+                    ])
+                }
+                
+                // Call DatabaseManager to set the order
+                DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)) { error in
+                    if let error = error {
+                        print("Error setting order: \(error)")
+                    }
+                }
+                
+                print(userId)
+                
+                for cart in cartItems {
+                    let index = getIndex(item: cart.item, isCartIndex: false)
+                    let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
+                        return cart.item.id == item1.id
+                    } ?? 0
+                    
+                    // Toggle the isAdded state
+                    items[index].isAdded.toggle()
+                    filtered[filteredIndex].isAdded.toggle()
+                    
+                }
+                
+                cartItems.removeAll()
+            }
+            else{
                 self.alertMessage = "No hay conexión a internet. No se puede actualizar la orden."
                 self.showAlert = true
             }
-        print(userId)
-        
-        for cart in cartItems {
-            let index = getIndex(item: cart.item, isCartIndex: false)
-            let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
-                return cart.item.id == item1.id
-            } ?? 0
-            
-            // Toggle the isAdded state
-            items[index].isAdded.toggle()
-            filtered[filteredIndex].isAdded.toggle()
-            
         }
-
-        cartItems.removeAll()
     }
 
 
