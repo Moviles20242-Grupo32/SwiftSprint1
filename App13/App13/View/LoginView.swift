@@ -66,24 +66,23 @@ struct LoginView: View {
                 Button {
                     Task {
                         
-                        try await viewModel.signIn(withEmail: email,password: password)
-                        
-//                        print("Conexión \(isConnected)")
-//                        if !isConnected {
-//                            errorMessage = "No hay conexión a internet. No se puede iniciar sesión."
-//                        }
-                       
-                        if viewModel.incorrectUserPassword{
-                            errorMessage = "Correo electrónico o contraseña incorrectos. Por favor intente de nuevo."
+                        if isConnected{
+                            try await viewModel.signIn(withEmail: email,password: password)
+                           
+                            if viewModel.incorrectUserPassword{
+                                errorMessage = "Correo electrónico o contraseña incorrectos. Por favor intente de nuevo."
+                            }
+                            
+                            let tldRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.(com|edu|org|net|gov|io)"
+                            let emailPredicate = NSPredicate(format: "SELF MATCHES %@", tldRegex)
+                            
+                            if !emailPredicate.evaluate(with: email) {
+                                errorMessage = "Formato incorrecto para el correo."
+                            }
                         }
-                        
-                        let tldRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.(com|edu|org|net|gov|io)"
-                        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", tldRegex)
-                        
-                        if !emailPredicate.evaluate(with: email) {
-                            errorMessage = "Formato incorrecto para el correo."
+                        else{
+                            errorMessage = "No hay conexión a internet. No se puede iniciar sesión"
                         }
-                        
                         
                     }
                 } label: {
