@@ -33,7 +33,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     @Published var favorite: Item? = nil
     
     @Published var cartItems: [Cart] = []
-    @Published var ordered = false
+//    @Published var ordered = false
     
     @State private var synthesizer: AVSpeechSynthesizer?
     
@@ -46,6 +46,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         super.init() // Call the super init first
         locationManager.delegate = self
         locationManager.requestWhenInUseAuthorization()
+        loadCartItems() // load cart items saved in cache.
         
     }
     
@@ -146,41 +147,30 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func addToCart(item:Item){
         
-//        self.items[getIndex(item: item, isCartIndex: false)].isAdded = !item.isAdded
-//        
-//        let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
-//            return item.id == item1.id
-//        } ?? 0
-//        
-//        self.filtered[filteredIndex].isAdded = !item.isAdded
-//        
-//        if item.isAdded {
-//            
-//            self.cartItems.remove(at: getIndex(item: item, isCartIndex: true))
-//            return
-//        }
-//        
-//        self.cartItems.append(Cart(item:item, quantity: 1))
-//        print(self.cartItems)
-        
         let index = getIndex(item: item, isCartIndex: false)
         let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
             return item.id == item1.id
         } ?? 0
         
         // Toggle the isAdded state
-        items[index].isAdded.toggle()
-        filtered[filteredIndex].isAdded.toggle()
-
-        // Ensure favorite is updated if it's the same item
-        if favorite?.id == item.id {
-            favorite?.isAdded = items[index].isAdded
+        items[index].toggleIsAdded()
+        if items[index].id != filtered[filteredIndex].id { //is this necessary?
+            filtered[filteredIndex].toggleIsAdded()
         }
+        
+        // Ensure favorite is updated if it's the same item
+//        if favorite?.id == item.id {
+//            favorite?.isAdded = items[index].isAdded
+//        }
 
-        if items[index].isAdded {
-            cartItems.append(Cart(item: items[index], quantity: 1))
-        } else {
-            cartItems.remove(at: getIndex(item: item, isCartIndex: true))
+        // Adds the added item to the cartitems and the cache.
+        if  items[index].isAdded {
+            let newCartItem = Cart(item: items[index], quantity: 1)
+            cartItems.append(newCartItem)
+            CartCache.shared.addCartItem(newCartItem) // Cache the item
+        } else { //removes de item from the cart and the cache.
+            let removedElement = cartItems.remove(at: getIndex(item: item, isCartIndex: true))
+            CartCache.shared.removeCartItem(byId: removedElement.id)
         }
         
     }
@@ -222,26 +212,34 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             guard let self = self else { return }
             
             if isConnected {
-                let userId = Auth.auth().currentUser!.uid
                 
-                if self.ordered {
-                    self.ordered = false
+                if cartItems.isEmpty {
                     
-                    // Call DatabaseManager to delete the order
-                    DatabaseManager.shared.deleteOrder(for: userId) { [weak self] error in
-                        if let error = error {
-                            print("Error deleting order: \(error)")
-                            self?.ordered = true
-                        }
+                    let alertController = UIAlertController(
+                        title: "Carrito vacío",
+                        message: "Añada artículos al carrito para realizar su orden ",
+                        preferredStyle: .alert
+                    )
+                    
+                    // Add an OK button to the alert
+                    let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                    alertController.addAction(okAction)
+                    
+                    // Present the alert
+                    if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+                        viewController.present(alertController, animated: true, completion: nil)
                     }
                     
                     return
+                    
                 }
+                
+                let userId = Auth.auth().currentUser!.uid
                 
                 var details: [[String: Any]] = []
                 var items_ids: [[String: Any]] = []
                 
-                self.cartItems.forEach { cart in
+                cartItems.forEach { cart in
                     details.append([
                         "item_name": cart.item.item_name,
                         "item_quantity": cart.quantity,
@@ -249,26 +247,44 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                     ])
                     
                     items_ids.append([
-                        "id": cart.item.id,
-                        "num": cart.quantity
+                        "id":cart.item.id,
+                        "num":cart.quantity
                     ])
                 }
                 
-                self.ordered = true
-                
                 // Call DatabaseManager to set the order
-                DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids, totalCost: self.calculateTotalPrice(), location: GeoPoint(latitude: self.userLocation.coordinate.latitude, longitude: self.userLocation.coordinate.longitude)) { [weak self] error in
+                DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)) { error in
                     if let error = error {
                         print("Error setting order: \(error)")
-                        self?.ordered = false
                     }
                 }
-            } else {
+                
+                print(userId)
+                
+                for cart in cartItems {
+                    let index = getIndex(item: cart.item, isCartIndex: false)
+                    let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
+                        return cart.item.id == item1.id
+                    } ?? 0
+                    
+                    // Toggle the isAdded state
+                    items[index].toggleIsAdded()
+                    
+                    if items[index].id != filtered[filteredIndex].id {
+                        filtered[filteredIndex].toggleIsAdded()
+                    }
+                }
+                
+                CartCache.shared.clearCache()
+                cartItems.removeAll()
+            }
+            else{
                 self.alertMessage = "No hay conexión a internet. No se puede actualizar la orden."
                 self.showAlert = true
             }
         }
     }
+
 
         
     func calculateTotalPrice() -> NSNumber {
@@ -293,4 +309,29 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     }
 
     
+    //Function to increment or decrement the quantity to be ordered of an item in the cart.
+    func incrementDecrementItemQuantity(index: Int, operation: String){
+        
+        if operation == "+"{
+            let modifiedCart = self.cartItems[index].incrementQuantity()
+            self.cartItems[index] = modifiedCart
+        }
+        else if operation == "-" {
+            let modifiedCart2 = self.cartItems[index].decrementQuantity()
+            self.cartItems[index] = modifiedCart2        }
+    }
+    
+    // Function to retrieve cart items from the cache
+    func loadCartItems() {
+        // Load items from cache
+        for cartItem in CartCache.shared.getAllCartItems() {
+            cartItems.append(cartItem)
+        }
+    }
+    
+    // Function to clear the cart
+    func clearCart() {
+        cartItems.removeAll()
+        CartCache.shared.clearCache()
+    }
 }

@@ -62,7 +62,7 @@ class DatabaseManager: ObservableObject {
                 let times = doc.get("times_ordered") as! Int
                 
                 // Create and return an Item object
-                return Item(id: id, item_name: name, item_cost: cost, item_details: details, item_image: image, item_ratings: ratings, times_ordered: times)
+                return Item(id: id, item_name: name, item_cost: cost, item_details: details, item_image: image, item_ratings: ratings, times_ordered: times, isAdded: false)
             }
             
             // Pass the parsed items to the completion handler
@@ -137,79 +137,81 @@ class DatabaseManager: ObservableObject {
 //    }
         
     // Method to update/set order details
-        func setOrder(for userId: String, details: [[String: Any]], ids: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
-            let db = Firestore.firestore()
+    func setOrder(for userId: String, details: [[String: Any]], ids: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
+        let db = Firestore.firestore()
             
-            // Update or set the order details in the "Orders" collection for the userId
-            db.collection("Orders").document(userId).setData([
-                "ordered_food": details,
-                "total_cost": totalCost,
-                "location": location
-            ]) { (err) in
-                // Return any error encountered to the completion handler
-                completion(err)
-            }
+        // Update or set the order details in the "Orders" collection for the userId
+        db.collection("Orders").document(userId).setData([
+            "ordered_food": details,
+            "total_cost": totalCost,
+            "location": location,
+            "user_id": userId
+        ]) { (err) in
+            // Return any error encountered to the completion handler
+            completion(err)
+        }
             
             
-            // Iterate through each item ID and update 'times_ordered'
-            ids.forEach { id in
-                let itemId = id["id"] as? String ?? "Unknown"
-                let quantity = id["num"] as? Int ?? 0
-                
-                // Fetch the current 'times_ordered' value
-                db.collection("Items").document(itemId).getDocument { (document, error) in
-                    if let document = document, document.exists {
-                        let currentTimesOrdered = document.data()?["times_ordered"] as? Int ?? 0
-                        
-                        // Update 'times_ordered' by adding the incoming quantity
-                        db.collection("Items").document(itemId).updateData([
-                            "times_ordered": currentTimesOrdered + quantity
-                        ]) { err in
-                            if let err = err {
-                                print("Error updating times_ordered: \(err)")
-                            } else {
-                                print("Successfully updated times_ordered for item \(itemId)")
-                            }
+        // Iterate through each item ID and update 'times_ordered'
+        ids.forEach { id in
+            let itemId = id["id"] as? String ?? "Unknown"
+            let quantity = id["num"] as? Int ?? 0
+            
+            // Fetch the current 'times_ordered' value
+            db.collection("Items").document(itemId).getDocument { (document, error) in
+                if let document = document, document.exists {
+                    let currentTimesOrdered = document.data()?["times_ordered"] as? Int ?? 0
+                    
+                    // Update 'times_ordered' by adding the incoming quantity
+                    db.collection("Items").document(itemId).updateData([
+                        "times_ordered": currentTimesOrdered + quantity
+                    ]) { err in
+                        if let err = err {
+                            print("Error updating times_ordered: \(err)")
+                        } else {
+                            print("Successfully updated times_ordered for item \(itemId)")
                         }
-                    } else {
-                        print("Document does not exist for item \(itemId)")
                     }
+                } else {
+                    print("Document does not exist for item \(itemId)")
                 }
             }
-            
-            
         }
+            
+            
+    }
     
     // Async method to fetch a user document from Firestore by user ID
     func fetchUser(uid: String) async throws -> User? {
         print("En Database manager" + uid)
-                do {
-                    // Attempt to fetch the document from Firestore
-                    let snapshot = try await db.collection("users").document(uid).getDocument()
+        do {
+            // Attempt to fetch the document from Firestore
+            let snapshot = try await db.collection("users").document(uid).getDocument()
 
-                    // Check if the document exists
-                    if snapshot.exists {
-                        // Log the raw data returned from Firestore
-                        let data = snapshot.data()
-                        print("DEBUG: Fetched user data: \(String(describing: data))")
-                        
-                        // Attempt to decode the document into the User object
-                        return try snapshot.data(as: User.self)
-                    } else {
-                        // If no document exists for the given UID
-                        print("DEBUG: No document found for user UID: \(uid)")
-                        return nil
-                    }
-                } catch {
-                    // Log any errors that occur during fetching or decoding
-                    print("DEBUG: Error fetching user data: \(error)")
-                    throw error
-                }
+            // Check if the document exists
+            if snapshot.exists {
+                // Log the raw data returned from Firestore
+                let data = snapshot.data()
+                print("DEBUG: Fetched user data: \(String(describing: data))")
+                
+                // Attempt to decode the document into the User object
+                return try snapshot.data(as: User.self)
+            } else {
+                // If no document exists for the given UID
+                print("DEBUG: No document found for user UID: \(uid)")
+                return nil
+            }
+        } catch {
+            // Log any errors that occur during fetching or decoding
+            print("DEBUG: Error fetching user data: \(error)")
+            throw error
+        }
     }
+
 
     // Async method to create a new user in the "users" collection
     func createUser(user: User) async throws {
-        print("Usuario a crear")
+        print("Creando usuario")
         // Encode the User object to a Firestore-compatible format
         let encodedUser = try Firestore.Encoder().encode(user)
         // Save the encoded user data to Firestore
