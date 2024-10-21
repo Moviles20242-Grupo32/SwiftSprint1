@@ -20,6 +20,11 @@ struct RegistrationView: View {
     @EnvironmentObject var viewModel: AuthViewModel
     @Environment(\.presentationMode) var present
     
+    // Define the character limits
+    let fullNameLimit = 15
+    let emailLimit = 50
+    let passwordLimit = 20
+    
     var body: some View {
         VStack{
             
@@ -43,9 +48,13 @@ struct RegistrationView: View {
             
             //form fields
             VStack(spacing: 24){
-                InputView(text: $fullName,
-                          title: "Nombre",
-                          placeHolder: "Ingresa tu nombre")
+                
+                InputView(text: $fullName, title: "Nombre", placeHolder: "Ingresa tu nombre")
+                    .onChange(of: fullName) { newValue in
+                        if fullName.count > fullNameLimit {
+                            fullName = String(fullName.prefix(fullNameLimit))
+                        }
+                    }
                 
                 if !errorMessageName.isEmpty { //&& (fullName.count > 15 || fullName.isEmpty)
                     Text(errorMessageName)
@@ -57,9 +66,13 @@ struct RegistrationView: View {
                         .fixedSize(horizontal: false, vertical: /*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
                 }
                 
-                InputView(text: $email,
-                          title: "Correo electrónico",
-                          placeHolder: "nombre@ejemplo.com")
+                // Email input with character limit (max 50)
+                InputView(text: $email, title: "Correo electrónico", placeHolder: "nombre@ejemplo.com")
+                    .onChange(of: email) { newValue in
+                        if email.count > emailLimit {
+                            email = String(email.prefix(emailLimit))
+                        }
+                }
                 .autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
                 
 //                let tldRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.(com|edu|org|net|gov|io)"
@@ -75,10 +88,13 @@ struct RegistrationView: View {
                     
                 }
                 
-                InputView(text: $password,
-                          title: "Contraseña",
-                          placeHolder: "Ingresa una contraseña",
-                          isSecureField: true)
+                // Password input with character limit (max 20)
+                InputView(text: $password, title: "Contraseña", placeHolder: "Ingresa una contraseña", isSecureField: true)
+                    .onChange(of: password) { newValue in
+                        if password.count > passwordLimit {
+                            password = String(password.prefix(passwordLimit))
+                        }
+                }
 
 //                let passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$"
 //                let passwordPredicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
