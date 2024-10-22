@@ -131,6 +131,10 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                     self?.items = items
                     self?.filtered = items
                     self?.favorite = self?.getFavorite()
+                    
+                    if self?.favorite != nil {
+                        
+                    }
                 }
             }
         }
@@ -166,10 +170,10 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         if  items[index].isAdded {
             let newCartItem = Cart(item: items[index], quantity: 1)
             cartItems.append(newCartItem)
-            CartCache.shared.addCartItem(newCartItem) // Cache the item
+            CacheManager.shared.addCartItem(newCartItem) // Cache the item
         } else { //removes de item from the cart and the cache.
             let removedElement = cartItems.remove(at: getIndex(item: item, isCartIndex: true))
-            CartCache.shared.removeCartItem(byId: removedElement.id)
+            CacheManager.shared.removeCartItem(byId: removedElement.id)
         }
         
     }
@@ -274,7 +278,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                     }
                 }
                 
-                CartCache.shared.clearCache()
+                CacheManager.shared.clearCache()
                 cartItems.removeAll()
             }
             else{
@@ -314,8 +318,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     // Function to retrieve cart items from the cache
     func loadCartItems() {
         // Load items from cache
-        print("DEBUG loadCartItem: \(CartCache.shared.getAllCartItems().count)")
-        for cartItem in CartCache.shared.getAllCartItems() {
+        for cartItem in CacheManager.shared.getAllCartItems() {
             cartItems.append(cartItem)
         }
     }
@@ -324,7 +327,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     func clearCart() {
         cleanItems()
         cartItems.removeAll()
-        CartCache.shared.clearCache()
+        CacheManager.shared.clearCache()
     }
     
     func cleanItems(){

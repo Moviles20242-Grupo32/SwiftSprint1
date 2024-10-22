@@ -39,7 +39,7 @@
 		A084B79C2C87925500E9D966 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = A084B79B2C87925500E9D966 /* User.swift */; };
 		A084B79E2C87B56000E9D966 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A084B79D2C87B56000E9D966 /* ProfileView.swift */; };
 		A084B7A02C87C3DB00E9D966 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A084B79F2C87C3DB00E9D966 /* AuthViewModel.swift */; };
-		A0FD63D42CC1EDC600127CD3 /* CartCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FD63D32CC1EDC600127CD3 /* CartCache.swift */; };
+		A0FD63D42CC1EDC600127CD3 /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FD63D32CC1EDC600127CD3 /* CacheManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,7 +89,7 @@
 		A084B79B2C87925500E9D966 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		A084B79D2C87B56000E9D966 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		A084B79F2C87C3DB00E9D966 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
-		A0FD63D32CC1EDC600127CD3 /* CartCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartCache.swift; sourceTree = "<group>"; };
+		A0FD63D32CC1EDC600127CD3 /* CacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -207,7 +207,7 @@
 				A084B79B2C87925500E9D966 /* User.swift */,
 				72CD64402C9280DC000AFB57 /* DatabaseManager.swift */,
 				A03C20E62C98C05A00B933D6 /* LocationManager.swift */,
-				A0FD63D32CC1EDC600127CD3 /* CartCache.swift */,
+				A0FD63D32CC1EDC600127CD3 /* CacheManager.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -403,7 +403,7 @@
 				72D37E902C7FF8EE00F51B8D /* App13App.swift in Sources */,
 				A03C20E72C98C05A00B933D6 /* LocationManager.swift in Sources */,
 				A03C20E52C98BFCF00B933D6 /* LocationViewModel.swift in Sources */,
-				A0FD63D42CC1EDC600127CD3 /* CartCache.swift in Sources */,
+				A0FD63D42CC1EDC600127CD3 /* CacheManager.swift in Sources */,
 				72D37EC62C7FFDFE00F51B8D /* HomeViewModel.swift in Sources */,
 				72D37EE12C815B0400F51B8D /* ItemView.swift in Sources */,
 				72D37EDF2C81200E00F51B8D /* Item.swift in Sources */,
