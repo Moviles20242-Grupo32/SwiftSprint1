@@ -110,6 +110,7 @@ struct LoginView: View {
                 if !errorMessage.isEmpty && errorMessage != "Formato incorrecto para el correo."{
                     Text(errorMessage)
                         .frame(width: 350, alignment: .leading)
+                        .multilineTextAlignment(.center)
                         .foregroundColor(.red)
                         .font(.subheadline)
                         .padding(.top, 8)

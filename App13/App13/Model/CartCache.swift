@@ -22,7 +22,7 @@ class CartCache {
         print("DEBUG: cart item added to Cache. Cache size: \(keys.count)")
     }
     
-    // Retrieve a Cart item from the cache
+    // Retrieve a Cart ithttps://github.com/Moviles20242-Grupo32/SwiftSprint2/pull/46/filesem from the cache
     func getCartItem(byId id: String) -> Cart? {
         return cache.object(forKey: id as NSString)
     }

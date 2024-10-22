@@ -185,6 +185,12 @@ struct Home: View {
                         
                         Spacer()
                         
+                        Text("No se pueden mostrar las cajas disponibles porque no hay conexión a internet")
+                            .font(.headline)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
+                            .padding()
+                        
                         ProgressView()
                         
                         Spacer()
