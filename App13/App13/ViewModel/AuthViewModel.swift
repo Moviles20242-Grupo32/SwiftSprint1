@@ -120,6 +120,7 @@ class AuthViewModel: ObservableObject {
             }
             
         do {
+            HomeModel.clearCart()
             try Auth.auth().signOut()
             self.userSession = nil
             currentUser = nil
