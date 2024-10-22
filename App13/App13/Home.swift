@@ -119,61 +119,67 @@ struct Home: View {
                             .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
                     }
                     
-                    HStack(spacing: 15){
+                    HStack{
                         
-                        Image(systemName: "magnifyingglass")
-                            .font(.title2)
-                            .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
-                        
-                        TextField("", text: $HomeModel.search)
-                            .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
-                            .padding(.vertical, 10)
-                            .onChange(of: HomeModel.search) { newValue in
-                                // Cancel any previous debounce timers
-                                // Cancel any previous debounce timer
-                                searchDebounceTimer?.cancel()
-                                
-                                // Start a new debounce timer
-                                searchDebounceTimer = Just(newValue)
-                                    .delay(for: .seconds(0.8), scheduler: RunLoop.main)
-                                    .sink { finalValue in
-                                        if !finalValue.isEmpty {
-                                            // Log the event after 0.8 seconds of inactivity
-                                            Analytics.logEvent("search_completed", parameters: [
-                                                "search_term": finalValue
-                                            ])
-                                            print("Event logged: search_term = \(finalValue)")
-                                            
-                                            HomeModel.saveSearchUse(finalValue: finalValue)
+                        HStack(spacing: 15){
+                            
+                            Image(systemName: "magnifyingglass")
+                                .font(.title2)
+                                .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                            
+                            TextField("", text: $HomeModel.search)
+                                .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                                .padding(.vertical, 10)
+                                .onChange(of: HomeModel.search) { newValue in
+                                    searchDebounceTimer?.cancel()
+                                    
+                                    // Start a new debounce timer
+                                    searchDebounceTimer = Just(newValue)
+                                        .delay(for: .seconds(0.8), scheduler: RunLoop.main)
+                                        .sink { finalValue in
+                                            if !finalValue.isEmpty {
+                                                // Log the event after 0.8 seconds of inactivity
+                                                Analytics.logEvent("search_completed", parameters: [
+                                                    "search_term": finalValue
+                                                ])
+                                                print("Event logged: search_term = \(finalValue)")
+                                                
+                                                HomeModel.saveSearchUse(finalValue: finalValue)
+                                            }
                                         }
-                                    }
                             }
-                    }
-                    .padding(.horizontal)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10) // Adjust corner radius as needed
-                            .fill(Color.white) // Background color of the rectangle
-                            .shadow(color: Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0), radius: 5, x: 0, y: 2) // Shadow parameters
-                    )
-                    .padding(.horizontal, 20)
-                    .padding(.top,10)
-                    
-                    
-                    Button(action: {
-                        // Toggle the filter state
-                        showHighRatedItems.toggle()
+                        }
+                        .padding(.horizontal)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10) // Adjust corner radius as needed
+                                .fill(Color.white) // Background color of the rectangle
+                                .shadow(color: Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0), radius: 5, x: 0, y: 2) // Shadow parameters
+                        )
+                        .padding(.leading, 20)
+                        .padding(.top,10)
                         
-                        // Call the filter function in the HomeViewModel
-                        HomeModel.filterHighRatedItems(showHighRated: showHighRatedItems)
-                    }) {
-                        Text(showHighRatedItems ? "Todas las cajas" : "Mostrar rating alto")
-                            .font(.headline)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
+                        Button(action: {
+                            // Toggle the filter state
+                            showHighRatedItems.toggle()
+                            
+                            // Call the filter function in the HomeViewModel
+                            HomeModel.filterHighRatedItems(showHighRated: showHighRatedItems)
+                            
+                            HomeModel.saveStarFilterUse()
+                        }) {
+                            Image(systemName: "star.fill")
+                                .resizable()  // Make the image resizable
+                                .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
+                                .frame(width: 15, height: 15)  // Set the width and height
+                                .foregroundColor(.white)
+                                .padding(10)
+                                .background(showHighRatedItems ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                                .clipShape(Circle())
+                        }
+                        .padding(10)
+                        .padding(.top,10)
                     }
-                    .padding(3)
+                    
                     
                     if HomeModel.items.isEmpty{
                         
@@ -249,8 +255,10 @@ struct Home: View {
                 if value == HomeModel.search && HomeModel.search != ""{
                     HomeModel.filterData()
                 }
-                
-                if HomeModel.search == ""{
+                else if HomeModel.search == "" &&  showHighRatedItems == true{
+                    withAnimation(.linear) {HomeModel.filterHighRatedItems(showHighRated:showHighRatedItems)}
+                }
+                else if HomeModel.search == ""{
                     withAnimation(.linear) { HomeModel.filtered = HomeModel.items}
                 }
             }

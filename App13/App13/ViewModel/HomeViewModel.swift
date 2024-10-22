@@ -139,7 +139,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func filterData(){
         withAnimation(.linear){
-            self.filtered = self.items.filter{
+            self.filtered = self.filtered.filter{
                 return $0.item_name.lowercased().contains(self.search.lowercased())
             }
         }
@@ -302,7 +302,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func filterHighRatedItems(showHighRated: Bool) {
         if showHighRated {
-            filtered = items.filter { $0.item_ratings == "4" }
+            filtered = items.filter { $0.item_ratings == "5" }
         } else {
             filtered = items // Reset to show all items
         }
@@ -333,5 +333,9 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     func clearCart() {
         cartItems.removeAll()
         CartCache.shared.clearCache()
+    }
+    
+    func saveStarFilterUse() {
+        DatabaseManager.shared.saveStarFilterUse()
     }
 }

@@ -33,15 +33,17 @@ struct ItemView: View {
                         
                         if favoriteName == item.item_name {
                             ZStack {
-                                // Circle background
-                                Circle()
-                                    .fill(Color.orange)
-                                    .frame(width: 25, height: 25) // Circle size
-
-                                // Star inside the circle
-                                Image(systemName: "star.fill")
-                                    .foregroundColor(.white)  // Star color
-                                    .scaleEffect(0.5)  // Scale the star relative to its original size
+                                // Banner background
+                                RoundedRectangle(cornerRadius: 10)  // Creates a rectangle with rounded corners
+                                    .fill(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))  // Fill color for the banner
+                                    .frame(width: 70, height: 25)  // Adjust the banner size as needed
+                                
+                                // Text inside the banner
+                                Text("Favorito")
+                                    .font(.caption)  // Set the font size
+                                    .foregroundColor(.white)  // Set the text color
+                                    .bold()  // Make the text bold if desired
+                                
                             }
                         }
                     }
