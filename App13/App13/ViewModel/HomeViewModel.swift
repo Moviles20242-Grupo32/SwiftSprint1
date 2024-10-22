@@ -324,6 +324,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     // Function to retrieve cart items from the cache
     func loadCartItems() {
         // Load items from cache
+        print("DEBUG loadCartItem: \(CartCache.shared.getAllCartItems().count)")
         for cartItem in CartCache.shared.getAllCartItems() {
             cartItems.append(cartItem)
         }
@@ -331,11 +332,14 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     // Function to clear the cart
     func clearCart() {
+        cleanItems()
         cartItems.removeAll()
         CartCache.shared.clearCache()
     }
     
     func saveStarFilterUse() {
         DatabaseManager.shared.saveStarFilterUse()
+    func cleanItems(){
+        cartItems.forEach{ $0.item.toggleIsAdded() }
     }
 }
