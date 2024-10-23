@@ -19,7 +19,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     @Published var search = ""
     
     //Location details
-    @Published var userLocation : CLLocation!
+    @Published var userLocation : CLLocation?
     @Published var userAdress = ""
     @Published var noLocation = false
     
@@ -38,6 +38,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     @Published var showAlert = false
     @Published var alertMessage = ""
+    
+    @Published var showLocationAlert = false
     
     static let shared = HomeViewModel()
 
@@ -76,7 +78,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     }
     
     func extractLocation(){
-        CLGeocoder().reverseGeocodeLocation(self.userLocation){ (res, err) in
+        CLGeocoder().reverseGeocodeLocation(self.userLocation!){ (res, err) in
             guard let safeData = res else{return}
             
             var address = ""
@@ -252,7 +254,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                 }
                 
                 // Call DatabaseManager to set the order
-                DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)) { error in
+                DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation! .coordinate.latitude, longitude: userLocation!.coordinate.longitude)) { error in
                     if let error = error {
                         print("Error setting order: \(error)")
                     }
