@@ -44,7 +44,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
             // Sign the user out when app is about to close
         @EnvironmentObject var viewModel: AuthViewModel
-        viewModel.signOut()
+//        viewModel.signOut()
     }
 }
 
