@@ -29,6 +29,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     //ItemData
     @Published var items: [Item] = []
     @Published var filtered: [Item] = []
+    private var allItems: [Item] = []
     @Published var favorite: Item? = nil
     
     @Published var cartItems: [Cart] = []
@@ -138,7 +139,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func filterData(){
         withAnimation(.linear){
-            self.filtered = self.items.filter{
+            self.filtered = self.filtered.filter{
                 return $0.item_name.lowercased().contains(self.search.lowercased())
             }
         }
@@ -299,6 +300,15 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         DatabaseManager.shared.saveSearchUse(finalValue: finalValue)
     }
     
+    func filterHighRatedItems(showHighRated: Bool) {
+        if showHighRated {
+            filtered = items.filter { $0.item_ratings == "5" }
+        } else {
+            filtered = items // Reset to show all items
+        }
+    }
+
+    
     //Function to increment or decrement the quantity to be ordered of an item in the cart.
     func incrementDecrementItemQuantity(index: Int, operation: String){
         
@@ -327,6 +337,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         CartCache.shared.clearCache()
     }
     
+    func saveStarFilterUse() {
+        DatabaseManager.shared.saveStarFilterUse()
     func cleanItems(){
         cartItems.forEach{ $0.item.toggleIsAdded() }
     }
