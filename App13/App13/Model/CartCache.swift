@@ -29,6 +29,8 @@ class CartCache {
             .url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
             .appendingPathComponent("CartCache.sqlite")
         
+        print(fileURL.path())
+        
         // Open the database
         if sqlite3_open(fileURL.path, &db) != SQLITE_OK {
             print("DEBUG: Error opening database")
@@ -98,26 +100,38 @@ class CartCache {
         var statement: OpaquePointer?
         
         let insertQuery = """
-        INSERT OR REPLACE INTO Cart (id, itemId, itemName, itemCost, itemDetails, itemImage, itemRatings, isAdded, timesOrdered, quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO Cart (id, itemId, itemName, itemCost, itemDetails, itemImage, itemRatings, isAdded, timesOrdered, quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """
         
         if sqlite3_prepare_v2(db, insertQuery, -1, &statement, nil) == SQLITE_OK {
             // Bind the parameters
             sqlite3_bind_text(statement, 1, cart.id, -1, nil)
+            print("Cart ID: ",cart.id)
             sqlite3_bind_text(statement, 2, cart.item.id, -1, nil)
+            print("Item ID: ",cart.item.id)
             sqlite3_bind_text(statement, 3, cart.item.item_name, -1, nil)
+            print("Item Name: ",cart.item.item_name)
             sqlite3_bind_double(statement, 4, cart.item.item_cost.doubleValue)
+            print("Item Cost: ",cart.item.item_cost)
             sqlite3_bind_text(statement, 5, cart.item.item_details, -1, nil)
+            print("Item Details: ",cart.item.item_details)
             sqlite3_bind_text(statement, 6, cart.item.item_image, -1, nil)
+            print("Item Image: ",cart.item.item_image)
             sqlite3_bind_text(statement, 7, cart.item.item_ratings, -1, nil)
+            print("Item Ratings: ",cart.item.item_ratings)
             sqlite3_bind_int(statement, 8, cart.item.isAdded ? 1 : 0)
+            print("Is Added: ",cart.item.isAdded)
             sqlite3_bind_int(statement, 9, Int32(cart.item.times_ordered))
+            print("Times Ordered: ",cart.item.times_ordered)
             sqlite3_bind_int(statement, 10, Int32(cart.quantity))
+            print("Quantity: ",cart.quantity)
             
             if sqlite3_step(statement) == SQLITE_DONE {
                 print("DEBUG: Successfully added cart to database")
+                print(countRows())
             } else {
-                print("DEBUG: Failed to add cart to database")
+                let errorMessage = String(cString: sqlite3_errmsg(db))
+                print("DEBUG: Failed to add cart to database. Error: \(errorMessage)")
             }
         }
         sqlite3_finalize(statement)
@@ -134,6 +148,7 @@ class CartCache {
             
             if sqlite3_step(statement) == SQLITE_DONE {
                 print("DEBUG: Successfully removed cart from database")
+                print(countRows())
             } else {
                 print("DEBUG: Failed to remove cart from database")
             }
@@ -147,10 +162,12 @@ class CartCache {
         
         if sqlite3_exec(db, deleteAllQuery, nil, nil, nil) == SQLITE_OK {
             print("DEBUG: Cleared all cart items from database")
+            print(countRows())
         } else {
             print("DEBUG: Failed to clear cart items from database")
         }
     }
+    
     
     // Restore Cart items from SQLite database and populate the cache
     private func restoreCartCacheFromDatabase() {
@@ -186,5 +203,23 @@ class CartCache {
             print("DEBUG: Failed to restore cart items from database")
         }
         sqlite3_finalize(statement)
+    }
+    
+    // Function to count the rows in a specified table
+    func countRows() -> Int {
+        let querySQL = "SELECT COUNT(*) FROM Cart;"
+        var stmt: OpaquePointer?
+        var rowCount = 0
+        
+        if sqlite3_prepare_v2(db, querySQL, -1, &stmt, nil) == SQLITE_OK {
+            if sqlite3_step(stmt) == SQLITE_ROW {
+                rowCount = Int(sqlite3_column_int(stmt, 0)) // Get the row count
+            }
+            sqlite3_finalize(stmt)
+        } else {
+            print("ERROR: Could not prepare count query for table Cart.")
+        }
+        
+        return rowCount
     }
 }
