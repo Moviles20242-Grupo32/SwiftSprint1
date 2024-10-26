@@ -145,6 +145,8 @@ struct Home: View {
                                                 print("Event logged: search_term = \(finalValue)")
                                                 
                                                 HomeModel.saveSearchUse(finalValue: finalValue)
+                                                
+                                                HomeModel.saveSearch(finalValue: finalValue)
                                             }
                                         }
                             }
