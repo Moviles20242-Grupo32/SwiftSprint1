@@ -45,7 +45,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         super.init() // Call the super init first
         locationManager.delegate = self
         locationManager.requestWhenInUseAuthorization()
-        loadCartItems() // load cart items saved in cache.
+//        loadCartItems() // load cart items saved in cache.
         
     }
     
@@ -104,6 +104,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             print("Sucess \(res!.user.uid)")
             self.fetchData()
             
+            
         }
     }
     
@@ -131,6 +132,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                     self?.items = items
                     self?.filtered = items
                     self?.favorite = self?.getFavorite()
+                    self?.loadCartItems()
                 }
             }
         }
@@ -314,6 +316,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     // Function to retrieve cart items from the cache
     func loadCartItems() {
         // Load items from cache
+        print(items.count)
+        CartCache.shared.restoreCartCacheFromDatabase(items: items)
         print("DEBUG loadCartItem: \(CartCache.shared.getAllCartItems().count)")
         for cartItem in CartCache.shared.getAllCartItems() {
             cartItems.append(cartItem)
@@ -330,4 +334,15 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     func cleanItems(){
         cartItems.forEach{ $0.item.toggleIsAdded() }
     }
+    
+    func getItem(id:String ) -> Item? {
+        for item in items {
+            if item.id == id {
+                return item
+            }
+        }
+        return nil
+    }
+    
+
 }

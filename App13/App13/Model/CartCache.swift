@@ -12,14 +12,12 @@ class CartCache {
     static let shared = CartCache() // Singleton instance
     
     private var db: OpaquePointer?
-    
     private let cache = NSCache<NSString, Cart>() // Cache to store Cart items
     private var keys: [String] = [] // Array to store keys of cached items
     
     // Private initializer to enforce the singleton pattern
     private init() {
         setupDatabase()
-        restoreCartCacheFromDatabase()
     }
     
     // This function sets up the SQLite database and creates the table if it doesn't exist
@@ -105,19 +103,19 @@ class CartCache {
         
         if sqlite3_prepare_v2(db, insertQuery, -1, &statement, nil) == SQLITE_OK {
             // Bind the parameters
-            sqlite3_bind_text(statement, 1, cart.id, -1, nil)
+            sqlite3_bind_text(statement, 1, (cart.id as NSString).utf8String, -1, nil)
             print("Cart ID: ",cart.id)
-            sqlite3_bind_text(statement, 2, cart.item.id, -1, nil)
+            sqlite3_bind_text(statement, 2, (cart.item.id as NSString).utf8String, -1, nil)
             print("Item ID: ",cart.item.id)
-            sqlite3_bind_text(statement, 3, cart.item.item_name, -1, nil)
+            sqlite3_bind_text(statement, 3, (cart.item.item_name as NSString).utf8String, -1, nil)
             print("Item Name: ",cart.item.item_name)
             sqlite3_bind_double(statement, 4, cart.item.item_cost.doubleValue)
             print("Item Cost: ",cart.item.item_cost)
-            sqlite3_bind_text(statement, 5, cart.item.item_details, -1, nil)
+            sqlite3_bind_text(statement, 5, (cart.item.item_details as NSString).utf8String, -1, nil)
             print("Item Details: ",cart.item.item_details)
-            sqlite3_bind_text(statement, 6, cart.item.item_image, -1, nil)
+            sqlite3_bind_text(statement, 6, (cart.item.item_image as NSString).utf8String, -1, nil)
             print("Item Image: ",cart.item.item_image)
-            sqlite3_bind_text(statement, 7, cart.item.item_ratings, -1, nil)
+            sqlite3_bind_text(statement, 7, (cart.item.item_ratings as NSString).utf8String, -1, nil)
             print("Item Ratings: ",cart.item.item_ratings)
             sqlite3_bind_int(statement, 8, cart.item.isAdded ? 1 : 0)
             print("Is Added: ",cart.item.isAdded)
@@ -128,7 +126,6 @@ class CartCache {
             
             if sqlite3_step(statement) == SQLITE_DONE {
                 print("DEBUG: Successfully added cart to database")
-                print(countRows())
             } else {
                 let errorMessage = String(cString: sqlite3_errmsg(db))
                 print("DEBUG: Failed to add cart to database. Error: \(errorMessage)")
@@ -144,7 +141,7 @@ class CartCache {
         let deleteQuery = "DELETE FROM Cart WHERE id = ?;"
         
         if sqlite3_prepare_v2(db, deleteQuery, -1, &statement, nil) == SQLITE_OK {
-            sqlite3_bind_text(statement, 1, id, -1, nil)
+            sqlite3_bind_text(statement, 1, (id as NSString).utf8String, -1, nil)
             
             if sqlite3_step(statement) == SQLITE_DONE {
                 print("DEBUG: Successfully removed cart from database")
@@ -167,10 +164,11 @@ class CartCache {
             print("DEBUG: Failed to clear cart items from database")
         }
     }
-    
+
     
     // Restore Cart items from SQLite database and populate the cache
-    private func restoreCartCacheFromDatabase() {
+    func restoreCartCacheFromDatabase(items: [Item]) {
+        print(items)
         let selectQuery = "SELECT id, itemId, itemName, itemCost, itemDetails, itemImage, itemRatings, isAdded, timesOrdered, quantity FROM Cart;"
         var statement: OpaquePointer?
         
@@ -179,25 +177,26 @@ class CartCache {
             while sqlite3_step(statement) == SQLITE_ROW {
                 let id = String(cString: sqlite3_column_text(statement, 0))
                 let itemId = String(cString: sqlite3_column_text(statement, 1))
-                let itemName = String(cString: sqlite3_column_text(statement, 2))
-                let itemCost = NSNumber(value: sqlite3_column_double(statement, 3))
-                let itemDetails = String(cString: sqlite3_column_text(statement, 4))
-                let itemImage = String(cString: sqlite3_column_text(statement, 5))
-                let itemRatings = String(cString: sqlite3_column_text(statement, 6))
-                let isAdded = sqlite3_column_int(statement, 7) == 1
-                let timesOrdered = Int(sqlite3_column_int(statement, 8))
                 let quantity = Int(sqlite3_column_int(statement, 9))
                 
+                
+                
                 // Create the Item and Cart instances
-                let item = Item(id: itemId, item_name: itemName, item_cost: itemCost, item_details: itemDetails, item_image: itemImage, item_ratings: itemRatings, times_ordered: timesOrdered, isAdded: isAdded)
-                let cart = Cart(item: item, quantity: quantity)
-                cart.id = id // Use the saved ID
+                if let item = items.first(where: { $0.id == itemId }){
+                    print(194)
+                    item.toggleIsAdded()
+                    let cart = Cart(item: item, quantity: quantity) // item is now non-optional
+                    cart.id = id // Use the saved ID
+                    
+                    // Restore the cart in the cache
+                    cache.setObject(cart, forKey: cart.id as NSString)
+                    keys.append(cart.id)
+                    
+                    print("DEBUG: Restored cart with id \(id) from database")
+                } else {
+                    print("DEBUG: Item with id \(itemId) not found.")
+                }
                 
-                // Restore the cart in the cache
-                cache.setObject(cart, forKey: cart.id as NSString)
-                keys.append(cart.id)
-                
-                print("DEBUG: Restored cart with id \(id) from database")
             }
         } else {
             print("DEBUG: Failed to restore cart items from database")
@@ -221,5 +220,36 @@ class CartCache {
         }
         
         return rowCount
+    }
+    
+    func updateItemQuantity(idCart: String, newQuantity: Int) {
+        var statement: OpaquePointer?
+
+        // Define the update query
+        let updateQuery = """
+        UPDATE Cart SET quantity = ? WHERE id = ?;
+        """
+        
+        // Prepare the statement
+        if sqlite3_prepare_v2(db, updateQuery, -1, &statement, nil) == SQLITE_OK {
+            
+            // Bind the new values to the statement
+            sqlite3_bind_int(statement, 1, Int32(newQuantity))
+            sqlite3_bind_text(statement, 2, (idCart as NSString).utf8String, -1, nil)
+            
+            // Execute the update
+            if sqlite3_step(statement) == SQLITE_DONE {
+                print("DEBUG: Successfully updated item with id \(idCart)")
+            } else {
+                let errorMessage = String(cString: sqlite3_errmsg(db))
+                print("DEBUG: Could not update item. Error: \(errorMessage)")
+            }
+        } else {
+            let errorMessage = String(cString: sqlite3_errmsg(db))
+            print("DEBUG: UPDATE statement could not be prepared. Error: \(errorMessage)")
+        }
+        
+        // Finalize the statement to release memory
+        sqlite3_finalize(statement)
     }
 }

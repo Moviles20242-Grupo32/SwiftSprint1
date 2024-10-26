@@ -20,11 +20,13 @@ class Cart: Identifiable, ObservableObject {
     
     func incrementQuantity() -> Cart {
         quantity += 1
+        CartCache.shared.updateItemQuantity(idCart: id, newQuantity: quantity)
         return self
     }
     
     func decrementQuantity() -> Cart{
         quantity -= 1
+        CartCache.shared.updateItemQuantity(idCart: id, newQuantity: quantity)
         return self
     }
     
