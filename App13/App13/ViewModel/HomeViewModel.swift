@@ -341,6 +341,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func saveStarFilterUse() {
         DatabaseManager.shared.saveStarFilterUse()
+    }
     func cleanItems(){
         cartItems.forEach{ $0.item.toggleIsAdded() }
     }
