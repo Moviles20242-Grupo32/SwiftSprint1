@@ -30,6 +30,7 @@ class AuthViewModel: ObservableObject {
     private var monitor: NWPathMonitor
     @Published var LocationModel = LocationViewModel.shared
     static let shared = AuthViewModel()
+    var timer: Timer?
 
     init() {
         
@@ -52,6 +53,16 @@ class AuthViewModel: ObservableObject {
             }
         }
         
+        timer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
+            // Background thread for non-UI work
+            DispatchQueue.global(qos: .background).async {
+                // Nest userInteractive thread for fetching data and updating the UI
+                DispatchQueue.global(qos: .userInteractive).async {
+                    self?.HomeModel.fetchData()
+                    print("Fetching data in background")
+                }
+            }
+        }
         
         self.userSession = Auth.auth().currentUser
         
@@ -112,13 +123,7 @@ class AuthViewModel: ObservableObject {
     }
     
     func signOut() {
-        guard isConnected else {
-                // Show alert if there's no internet connection
-                alertMessage = "No hay conexión a internet. No se puede cerrar sesión."
-                showAlert = true
-                return
-            }
-            
+       
         do {
             HomeModel.clearCart()
             try Auth.auth().signOut()

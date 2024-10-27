@@ -145,6 +145,8 @@ struct Home: View {
                                                 print("Event logged: search_term = \(finalValue)")
                                                 
                                                 HomeModel.saveSearchUse(finalValue: finalValue)
+                                                
+                                                HomeModel.saveSearch(finalValue: finalValue)
                                             }
                                         }
                             }
@@ -184,6 +186,12 @@ struct Home: View {
                     if HomeModel.items.isEmpty{
                         
                         Spacer()
+                        
+                        Text("No se pueden mostrar las cajas disponibles porque no hay conexión a internet")
+                            .font(.headline)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
+                            .padding()
                         
                         ProgressView()
                         

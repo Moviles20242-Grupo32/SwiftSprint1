@@ -43,6 +43,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     @Published var showLocationAlert = false
     
     static let shared = HomeViewModel()
+    
+    @Published var recentSearches: [String] = []
 
     override private init() {
         super.init() // Call the super init first
@@ -210,7 +212,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func updateOrder() {
         // Adding a delay of 1 second before executing the rest of the code
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now()) { [weak self] in
             guard let self = self else { return }
             
             if isConnected {
@@ -342,7 +344,28 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     func saveStarFilterUse() {
         DatabaseManager.shared.saveStarFilterUse()
     }
+
     func cleanItems(){
         cartItems.forEach{ $0.item.toggleIsAdded() }
+    }
+    
+    func saveSearch(finalValue: String) {
+        // Get current searches from UserDefaults
+        var recentSearches = UserDefaults.standard.stringArray(forKey: "recentSearches") ?? []
+        
+        // Append the new search value
+        recentSearches.append(finalValue)
+        
+        // Limit the number of stored searches (e.g., keep the last 10 searches)
+        if recentSearches.count > 10 {
+            recentSearches.removeFirst()
+        }
+        
+        // Save the updated array back to UserDefaults
+        UserDefaults.standard.set(recentSearches, forKey: "recentSearches")
+    }
+    
+    func getRecentSearches() {
+        self.recentSearches = UserDefaults.standard.stringArray(forKey: "recentSearches") ?? []
     }
 }
