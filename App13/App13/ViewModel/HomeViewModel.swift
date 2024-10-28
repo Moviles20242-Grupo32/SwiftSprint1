@@ -46,6 +46,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         locationManager.delegate = self
         locationManager.requestWhenInUseAuthorization()
         loadCartItems() // load cart items saved in cache.
+        self.favorite = CacheManager.shared.getFavoriteItem()
         
     }
     
@@ -130,8 +131,13 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                 DispatchQueue.main.async {
                     self?.items = items
                     self?.filtered = items
-                    self?.favorite = self?.getFavorite()
                     
+                    let favItem = CacheManager.shared.getFavoriteItem()
+                    if favItem != nil {
+                        self?.favorite = favItem
+                    }else{
+                        self?.favorite = self?.getFavorite()
+                    }
                     if self?.favorite != nil {
                         
                     }
@@ -278,7 +284,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                     }
                 }
                 
-                CacheManager.shared.clearCache()
+                CacheManager.shared.clearCartCache()
                 cartItems.removeAll()
             }
             else{
@@ -296,7 +302,9 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     }
     
     func getFavorite() -> Item? {
-        return items.max(by: { $0.times_ordered < $1.times_ordered })
+        let favItem = items.max(by: { $0.times_ordered < $1.times_ordered })
+        CacheManager.shared.addFavoriteItem(favItem)
+        return favItem
     }
 
     func saveSearchUse(finalValue: String) {
@@ -327,10 +335,12 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     func clearCart() {
         cleanItems()
         cartItems.removeAll()
-        CacheManager.shared.clearCache()
+        CacheManager.shared.clearCartCache()
     }
     
+    // function to clean items and the favorite Cache.
     func cleanItems(){
         cartItems.forEach{ $0.item.toggleIsAdded() }
+        CacheManager.shared.clearFavoriteCache()
     }
 }
