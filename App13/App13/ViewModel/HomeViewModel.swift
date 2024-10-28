@@ -19,7 +19,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     @Published var search = ""
     
     //Location details
-    @Published var userLocation : CLLocation!
+    @Published var userLocation : CLLocation?
     @Published var userAdress = ""
     @Published var noLocation = false
     
@@ -29,6 +29,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     //ItemData
     @Published var items: [Item] = []
     @Published var filtered: [Item] = []
+    private var allItems: [Item] = []
     @Published var favorite: Item? = nil
     
     @Published var cartItems: [Cart] = []
@@ -39,7 +40,11 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     @Published var showAlert = false
     @Published var alertMessage = ""
     
+    @Published var showLocationAlert = false
+    
     static let shared = HomeViewModel()
+    
+    @Published var recentSearches: [String] = []
 
     override private init() {
         super.init() // Call the super init first
@@ -76,7 +81,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     }
     
     func extractLocation(){
-        CLGeocoder().reverseGeocodeLocation(self.userLocation){ (res, err) in
+        CLGeocoder().reverseGeocodeLocation(self.userLocation!){ (res, err) in
             guard let safeData = res else{return}
             
             var address = ""
@@ -140,7 +145,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func filterData(){
         withAnimation(.linear){
-            self.filtered = self.items.filter{
+            self.filtered = self.filtered.filter{
                 return $0.item_name.lowercased().contains(self.search.lowercased())
             }
         }
@@ -209,7 +214,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func updateOrder() {
         // Adding a delay of 1 second before executing the rest of the code
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now()) { [weak self] in
             guard let self = self else { return }
             
             if isConnected {
@@ -254,7 +259,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                 }
                 
                 // Call DatabaseManager to set the order
-                DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)) { error in
+                DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation! .coordinate.latitude, longitude: userLocation!.coordinate.longitude)) { error in
                     if let error = error {
                         print("Error setting order: \(error)")
                     }
@@ -301,6 +306,15 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         DatabaseManager.shared.saveSearchUse(finalValue: finalValue)
     }
     
+    func filterHighRatedItems(showHighRated: Bool) {
+        if showHighRated {
+            filtered = items.filter { $0.item_ratings == "5" }
+        } else {
+            filtered = items // Reset to show all items
+        }
+    }
+
+    
     //Function to increment or decrement the quantity to be ordered of an item in the cart.
     func incrementDecrementItemQuantity(index: Int, operation: String){
         
@@ -331,6 +345,10 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         CartCache.shared.clearCache()
     }
     
+    func saveStarFilterUse() {
+        DatabaseManager.shared.saveStarFilterUse()
+    }
+
     func cleanItems(){
         cartItems.forEach{ $0.item.toggleIsAdded() }
     }
@@ -345,4 +363,23 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     }
     
 
+    func saveSearch(finalValue: String) {
+        // Get current searches from UserDefaults
+        var recentSearches = UserDefaults.standard.stringArray(forKey: "recentSearches") ?? []
+        
+        // Append the new search value
+        recentSearches.append(finalValue)
+        
+        // Limit the number of stored searches (e.g., keep the last 10 searches)
+        if recentSearches.count > 10 {
+            recentSearches.removeFirst()
+        }
+        
+        // Save the updated array back to UserDefaults
+        UserDefaults.standard.set(recentSearches, forKey: "recentSearches")
+    }
+    
+    func getRecentSearches() {
+        self.recentSearches = UserDefaults.standard.stringArray(forKey: "recentSearches") ?? []
+    }
 }

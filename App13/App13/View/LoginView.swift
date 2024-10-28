@@ -14,6 +14,9 @@ struct LoginView: View {
     @State private var errorMessage = ""
     @EnvironmentObject var viewModel: AuthViewModel
     
+    let emailLimit = 50
+    let passwordLimit = 20
+    
     var body: some View {
         NavigationStack {
             VStack{
@@ -41,9 +44,12 @@ struct LoginView: View {
                 //form fields
                 VStack(spacing: 24){
                     
-                    InputView(text: $email,
-                              title: "Correo electrónico",
-                              placeHolder: "nombre@ejemplo.com")
+                    InputView(text: $email, title: "Correo electrónico", placeHolder: "nombre@ejemplo.com")
+                        .onChange(of: email) { newValue in
+                            if email.count > emailLimit {
+                                email = String(email.prefix(emailLimit))
+                            }
+                    }
                     .autocapitalization(.none)
                     
                     if !errorMessage.isEmpty && errorMessage == "Formato incorrecto para el correo."{
@@ -54,10 +60,13 @@ struct LoginView: View {
                             .padding(.top, 8)
                     }
 
-                    InputView(text: $password,
-                              title: "Contraseña",
-                              placeHolder: "Ingrese su contraseña",
-                              isSecureField: true)
+                    // Password input with character limit (max 20)
+                    InputView(text: $password, title: "Contraseña", placeHolder: "Ingresa una contraseña", isSecureField: true)
+                        .onChange(of: password) { newValue in
+                            if password.count > passwordLimit {
+                                password = String(password.prefix(passwordLimit))
+                            }
+                    }
                 }
                 .padding(30)
                 .padding(.top, 12)
@@ -110,6 +119,7 @@ struct LoginView: View {
                 if !errorMessage.isEmpty && errorMessage != "Formato incorrecto para el correo."{
                     Text(errorMessage)
                         .frame(width: 350, alignment: .leading)
+                        .multilineTextAlignment(.center)
                         .foregroundColor(.red)
                         .font(.subheadline)
                         .padding(.top, 8)
