@@ -18,6 +18,7 @@ struct Home: View {
     @State var searchStartTime: TimeInterval?
     @StateObject var LocationModel = LocationViewModel.shared
     @State private var showHighRatedItems = false
+    @State private var showRecentSearchItems = false
     
     var body: some View {
         
@@ -178,7 +179,27 @@ struct Home: View {
                                 .background(showHighRatedItems ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
                                 .clipShape(Circle())
                         }
-                        .padding(10)
+                        .padding(.leading, 2)
+                        .padding(.top,10)
+                        
+                        Button(action: {
+                            // Toggle the filter state
+                            showRecentSearchItems.toggle()
+                            
+                            // Call the filter function in the HomeViewModel
+                            HomeModel.filterLastSearch(showRecentSearch:showRecentSearchItems)
+                            
+                        }) {
+                            Image(systemName: "clock.fill")
+                                .resizable()  // Make the image resizable
+                                .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
+                                .frame(width: 15, height: 15)  // Set the width and height
+                                .foregroundColor(.white)
+                                .padding(10)
+                                .background(showRecentSearchItems ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                                .clipShape(Circle())
+                        }
+                        .padding(.trailing, 5)
                         .padding(.top,10)
                     }
                     
@@ -238,17 +259,6 @@ struct Home: View {
                     
                 }
                 
-//                if HomeModel.noLocation{
-//                    Text("Por favor active el acceso a su ubicación en configuración para continuar !!!")
-//                        .foregroundColor(.black)
-//                        .frame(width: UIScreen.main.bounds.width - 100, height: 120)
-//                        .cornerRadius(10)
-//                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                        .background(Color.black.opacity(0.3).ignoresSafeArea())
-//                    
-//                    
-//                }
-//            }
         }
         .navigationBarHidden(true)
         .edgesIgnoringSafeArea(.top)
