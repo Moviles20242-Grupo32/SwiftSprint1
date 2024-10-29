@@ -17,13 +17,30 @@ struct ItemView: View {
             
             HStack{
                 
-                WebImage(url: URL(string: item.item_image))
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 100, height: 100)
-                    .clipped()
+                CacheAsyncImage(url: URL(string: item.item_image)!){ phase in
+                    switch phase {
+                    case .success(let image):
+                        HStack {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 100, height: 100)
+                                .clipped()
+                            Spacer()
+                        }
+                    case .failure(let error):
+                        Image(systemName: "xmark.octagon")
+                    case .empty:
+                        HStack {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .red))
+                            Spacer()
+                        }
+                    @unknown default:
+                        Image(systemName: "questionmark")
+                    }
+                }
 
-                
                 VStack(alignment: .leading, spacing: 4){
                     HStack{
                         Text(item.item_name)
