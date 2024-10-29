@@ -311,6 +311,10 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         DatabaseManager.shared.saveSearchUse(finalValue: finalValue)
     }
     
+    func saveElapsedTimeToCheckout(_ elapsedTime: NSNumber){
+        DatabaseManager.shared.saveElapsedTimeToCheckout(elapsedTime)
+    }
+    
     //Function to increment or decrement the quantity to be ordered of an item in the cart.
     func incrementDecrementItemQuantity(index: Int, operation: String){
         
