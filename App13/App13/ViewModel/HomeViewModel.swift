@@ -314,6 +314,34 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         }
     }
 
+    func filterLastSearch(showRecentSearch: Bool) {
+        if showRecentSearch {
+            getRecentSearches()
+            if let lastSearch = self.recentSearches.last {
+                filtered = items.filter{$0.item_name.lowercased().contains(lastSearch.lowercased())}
+            }
+            else{
+                filtered=[]
+                let alertController = UIAlertController(
+                    title: "No hay busquedas recientes",
+                    message: "No se puede filtrar por busqueda reciente",
+                    preferredStyle: .alert
+                )
+                
+                // Add an OK button to the alert
+                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                alertController.addAction(okAction)
+                
+                // Present the alert
+                if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+                    viewController.present(alertController, animated: true, completion: nil)
+                }
+                
+            }
+        } else {
+            filtered = items // Reset to show all items
+        }
+    }
     
     //Function to increment or decrement the quantity to be ordered of an item in the cart.
     func incrementDecrementItemQuantity(index: Int, operation: String){
@@ -330,7 +358,6 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     // Function to retrieve cart items from the cache
     func loadCartItems() {
         // Load items from cache
-        print(items.count)
         CartCache.shared.restoreCartCacheFromDatabase(items: items)
         print("DEBUG loadCartItem: \(CartCache.shared.getAllCartItems().count)")
         for cartItem in CartCache.shared.getAllCartItems() {
@@ -377,9 +404,12 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         
         // Save the updated array back to UserDefaults
         UserDefaults.standard.set(recentSearches, forKey: "recentSearches")
+        print("Save #: ",recentSearches.count)
     }
     
     func getRecentSearches() {
         self.recentSearches = UserDefaults.standard.stringArray(forKey: "recentSearches") ?? []
+        print("Get #:",recentSearches.count)
     }
+    
 }
