@@ -251,5 +251,21 @@ class DatabaseManager: ObservableObject {
             }
         }
     }
+    
+    func saveRecentSearchFilterUse() {
+        let timestamp = Timestamp()
+        let data: [String: Any] = [
+            "timestamp": timestamp,
+            "userId": currentUser?.id as Any
+        ]
+
+        db.collection("recentSearchFilterUse").addDocument(data: data) { error in
+            if let error = error {
+                print("Error saving star filter use: \(error)")
+            } else {
+                print("Star filter use successfully saved!")
+            }
+        }
+    }
 
 }
