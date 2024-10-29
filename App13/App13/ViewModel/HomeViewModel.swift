@@ -324,7 +324,9 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     }
     
     func saveElapsedTimeToCheckout(_ elapsedTime: NSNumber){
-        DatabaseManager.shared.saveElapsedTimeToCheckout(elapsedTime)
+        if !cartItems.isEmpty {
+            DatabaseManager.shared.saveElapsedTimeToCheckout(elapsedTime)
+        }
     }
     
     func saveUserSpendings(){
