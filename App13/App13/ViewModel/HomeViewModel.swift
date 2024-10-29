@@ -38,6 +38,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     @Published var showAlert = false
     @Published var alertMessage = ""
+    var orderValue: Decimal = 0
     
     static let shared = HomeViewModel()
 
@@ -197,22 +198,25 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         return isCartIndex ? cartIndex : index
     }
 
-    func calculateTotalPrice()->String{
+    func calculateTotalPrice() -> String {
         
-        var price : Float = 0
+        orderValue = 0
         
-        cartItems.forEach {(item) in
-            price += Float(item.quantity) * Float(truncating: item.item.item_cost)
+        cartItems.forEach {(cartItem) in
+            let quantity = Decimal(cartItem.quantity)
+            let unit_cost = cartItem.item.item_cost.decimalValue
+            orderValue += quantity * unit_cost
         }
         
-        return getPrice(value: price)
+        return getPrice(value: orderValue as NSNumber)
     }
     
-    func getPrice(value: Float)->String{
+    func getPrice(value: NSNumber) -> String {
+        
         let format = NumberFormatter()
         format.numberStyle = .currency
         
-        return format.string(from: NSNumber(value: value)) ?? ""
+        return format.string(from: value) ?? ""
     }
     
     func updateOrder() {
@@ -286,6 +290,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                 
                 CacheManager.shared.clearCartCache()
                 cartItems.removeAll()
+                orderValue = 0
             }
             else{
                 self.alertMessage = "No hay conexión a internet. No se puede actualizar la orden."
@@ -313,6 +318,12 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func saveElapsedTimeToCheckout(_ elapsedTime: NSNumber){
         DatabaseManager.shared.saveElapsedTimeToCheckout(elapsedTime)
+    }
+    
+    func saveUserSpendings(){
+        if orderValue != 0 {
+            DatabaseManager.shared.saveUserSpendings(amountSpent: orderValue as NSNumber)
+        }
     }
     
     //Function to increment or decrement the quantity to be ordered of an item in the cart.

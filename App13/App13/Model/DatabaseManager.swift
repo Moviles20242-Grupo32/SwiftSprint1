@@ -252,5 +252,22 @@ class DatabaseManager: ObservableObject {
             }
         }
     }
+    
+    func saveUserSpendings( amountSpent: NSNumber){
+        let timestamp = Timestamp()
+        let data: [String: Any] = [
+            "amount_spent": amountSpent,
+            "timestamp": timestamp,
+            "userId": currentUser?.id as Any
+        ]
+
+        db.collection("user_spendings").addDocument(data: data) { error in
+            if let error = error {
+                print("DEBUG: Error saving amount spent by user \(currentUser?.id ?? "???"): \(error)")
+            } else {
+                print("DEBUG: user spendings successfully saved.")
+            }
+        }
+    }
 
 }
