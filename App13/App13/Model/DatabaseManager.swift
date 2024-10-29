@@ -235,7 +235,24 @@ class DatabaseManager: ObservableObject {
             }
         }
     }
-    
+        
+    func saveElapsedTimeToCheckout(_ elapsedTime: NSNumber){
+        let timestamp = Timestamp()
+        let data: [String: Any] = [
+            "elapsed_time": elapsedTime,
+            "timestamp": timestamp,
+            "userId": currentUser?.id as Any
+        ]
+
+        db.collection("elapsed_time").addDocument(data: data) { error in
+            if let error = error {
+                print("DEBUG: Error saving elapsed time to checkout: \(error)")
+            } else {
+                print("DEBUG: Elapsed time to checkout successfully saved.")
+            }
+        }
+    }
+
     func saveStarFilterUse() {
         let timestamp = Timestamp()
         let data: [String: Any] = [

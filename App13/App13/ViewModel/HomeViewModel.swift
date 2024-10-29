@@ -318,6 +318,10 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         DatabaseManager.shared.saveSearchUse(finalValue: finalValue)
     }
     
+    func saveElapsedTimeToCheckout(_ elapsedTime: NSNumber){
+        DatabaseManager.shared.saveElapsedTimeToCheckout(elapsedTime)
+    }
+    
     func filterHighRatedItems(showHighRated: Bool) {
         if showHighRated {
             filtered = items.filter { $0.item_ratings == "5" }

@@ -160,12 +160,10 @@ struct CartView: View {
                 
                 Button(action: {
 
-                    let elapsedTime = Date().timeIntervalSince1970 - initialTime
+                    let elapsedTime = NSNumber(value: Date().timeIntervalSince1970 - initialTime)
                     Analytics.logEvent("time_to_checkout", parameters: [
-                        "elapsed_time": NSNumber(value: elapsedTime)
+                        "elapsed_time": elapsedTime
                     ])
-//                    print("DEBUG BQ: \(elapsedTime)")
-//                    print("DEBUG: startime: \(initialTime)")
                     
                     Analytics.logEvent("proceed_to_checkout", parameters: [
                         "timestamp": NSNumber(value: Date().timeIntervalSince1970)
@@ -177,6 +175,7 @@ struct CartView: View {
                         homeData.showLocationAlert = true
                     } else {
                         // Proceed with order update
+                        homeData.saveElapsedTimeToCheckout(elapsedTime)
                         print("Actualizando")
                         homeData.updateOrder()
                     }
