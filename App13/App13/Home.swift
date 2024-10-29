@@ -189,6 +189,8 @@ struct Home: View {
                             // Call the filter function in the HomeViewModel
                             HomeModel.filterLastSearch(showRecentSearch:showRecentSearchItems)
                             
+                            HomeModel.saveRecentSearchFilterUse()
+                            
                         }) {
                             Image(systemName: "clock.fill")
                                 .resizable()  // Make the image resizable
