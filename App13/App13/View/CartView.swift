@@ -128,7 +128,7 @@ struct CartView: View {
                                 homeData.items[itemIndex].isAdded = false
                                 homeData.filtered[itemIndex].isAdded = false
                                 
-                                CartCache.shared.removeCartItem(byId: homeData.cartItems[index].id)
+                                CacheManager.shared.removeCartItem(byId: homeData.cartItems[index].id)
                                 homeData.cartItems.remove(at: index)
                                 
                             }){
