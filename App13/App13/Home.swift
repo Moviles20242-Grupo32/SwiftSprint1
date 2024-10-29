@@ -168,7 +168,6 @@ struct Home: View {
                             // Call the filter function in the HomeViewModel
                             HomeModel.filterHighRatedItems(showHighRated: showHighRatedItems)
                             
-                            HomeModel.saveStarFilterUse()
                         }) {
                             Image(systemName: "star.fill")
                                 .resizable()  // Make the image resizable
@@ -189,7 +188,6 @@ struct Home: View {
                             // Call the filter function in the HomeViewModel
                             HomeModel.filterLastSearch(showRecentSearch:showRecentSearchItems)
                             
-                            HomeModel.saveRecentSearchFilterUse()
                             
                         }) {
                             Image(systemName: "clock.fill")
