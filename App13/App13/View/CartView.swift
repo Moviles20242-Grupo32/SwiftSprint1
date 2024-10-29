@@ -84,7 +84,7 @@ struct CartView: View {
                                     .lineLimit(2)
                                 
                                 HStack(spacing: 10){
-                                    Text(homeData.getPrice(value: Float(truncating: cart.item.item_cost)))
+                                    Text(homeData.getPrice(value: cart.item.item_cost))
                                         .font(.title2)
                                         .fontWeight(.heavy)
                                         .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
@@ -176,6 +176,7 @@ struct CartView: View {
                     } else {
                         // Proceed with order update
                         homeData.saveElapsedTimeToCheckout(elapsedTime)
+                        homeData.saveUserSpendings()
                         print("Actualizando")
                         homeData.updateOrder()
                     }
