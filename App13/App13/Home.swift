@@ -162,6 +162,8 @@ struct Home: View {
                         .padding(.top,10)
                         
                         Button(action: {
+                            
+                            showRecentSearchItems=false
                             // Toggle the filter state
                             showHighRatedItems.toggle()
                             
@@ -182,6 +184,9 @@ struct Home: View {
                         .padding(.top,10)
                         
                         Button(action: {
+                            
+                            showHighRatedItems=false
+                            
                             // Toggle the filter state
                             showRecentSearchItems.toggle()
                             
