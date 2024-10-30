@@ -170,7 +170,6 @@ class CartCache {
                 
                 // Create the Item and Cart instances
                 if let item = items.first(where: { $0.id == itemId }){
-                    print(194)
                     item.toggleIsAdded()
                     let cart = Cart(item: item, quantity: quantity) // item is now non-optional
                     cart.id = id // Use the saved ID
@@ -190,6 +189,7 @@ class CartCache {
         }
         sqlite3_finalize(statement)
     }
+    
     
     // Function to count the rows in a specified table
     func countRows() -> Int {

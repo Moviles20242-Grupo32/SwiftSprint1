@@ -215,6 +215,42 @@ class CacheManager {
         sqlite3_finalize(statement)
     }
     
+    // Restore Cart items from SQLite database and populate the cache
+    func restoreCartCacheFromDatabaseNoConnection() {
+        let selectQuery = "SELECT id, itemId, itemName, itemCost, itemDetails, itemImage, itemRatings, isAdded, timesOrdered, quantity FROM Cart;"
+        var statement: OpaquePointer?
+        
+        if sqlite3_prepare_v2(db, selectQuery, -1, &statement, nil) == SQLITE_OK {
+            // Loop through the result set and restore the cache
+            while sqlite3_step(statement) == SQLITE_ROW {
+                let id = String(cString: sqlite3_column_text(statement, 0))
+                let itemId = String(cString: sqlite3_column_text(statement, 1))
+                let itemName = String(cString: sqlite3_column_text(statement, 2))
+                let itemCost = NSNumber(value: sqlite3_column_double(statement, 3))
+                let itemDetails = String(cString: sqlite3_column_text(statement, 4))
+                let itemImage = String(cString: sqlite3_column_text(statement, 5))
+                let itemRatings = String(cString: sqlite3_column_text(statement, 6))
+                let isAdded = true
+                let timesOrdered = Int(sqlite3_column_int(statement, 7))
+                let quantity = Int(sqlite3_column_int(statement, 8))
+                
+
+                // Create the Item and Cart instances
+                let item = Item(id: itemId, item_name: itemName, item_cost: itemCost, item_details: itemDetails, item_image: itemImage, item_ratings: itemRatings, times_ordered: timesOrdered, isAdded: isAdded)
+                let cart = Cart(item: item, quantity: quantity) // item is now non-optional
+                cart.id = id // Use the saved ID
+                
+                // Restore the cart in the cache
+                cartCache.setObject(cart, forKey: cart.id as NSString)
+                cartCacheKeys.append(cart.id)
+                
+            }
+        } else {
+            print("DEBUG: Failed to restore cart items from database")
+        }
+        sqlite3_finalize(statement)
+    }
+    
     // Function to count the rows in a specified table
     func countRows() -> Int {
         let querySQL = "SELECT COUNT(*) FROM Cart;"
