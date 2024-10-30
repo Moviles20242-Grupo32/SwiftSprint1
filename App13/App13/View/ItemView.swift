@@ -26,7 +26,7 @@ struct ItemView: View {
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 100, height: 100)
                                 .clipped()
-                            Spacer()
+
                         }
                     case .failure(let error):
                         Image(systemName: "xmark.octagon")
