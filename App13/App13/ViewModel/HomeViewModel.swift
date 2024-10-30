@@ -337,6 +337,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func filterHighRatedItems(showHighRated: Bool) {
         if showHighRated {
+            saveStarFilterUse()
             filtered = items.filter { $0.item_ratings == "5" }
         } else {
             filtered = items // Reset to show all items
@@ -345,6 +346,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
 
     func filterLastSearch(showRecentSearch: Bool) {
         if showRecentSearch {
+            saveRecentSearchFilterUse()
             getRecentSearches()
             if let lastSearch = self.recentSearches.last {
                 filtered = items.filter{$0.item_name.lowercased().contains(lastSearch.lowercased())}
@@ -403,6 +405,10 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func saveStarFilterUse() {
         DatabaseManager.shared.saveStarFilterUse()
+    }
+    
+    func saveRecentSearchFilterUse() {
+        DatabaseManager.shared.saveRecentSearchFilterUse()
     }
 
     
