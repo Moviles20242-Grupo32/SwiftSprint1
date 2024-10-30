@@ -53,7 +53,7 @@ class AuthViewModel: ObservableObject {
             }
         }
         
-        timer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
             // Background thread for non-UI work
             DispatchQueue.global(qos: .background).async {
                 // Nest userInteractive thread for fetching data and updating the UI

@@ -149,9 +149,6 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                     }else{
                         self?.favorite = self?.getFavorite()
                     }
-                    if self?.favorite != nil {
-                        
-                    }
                     self?.loadCartItems()
                 }
             }
@@ -167,6 +164,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     }
     
     func addToCart(item:Item){
+        
+        print("Añadido")
         
         let index = getIndex(item: item, isCartIndex: false)
         let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
@@ -298,7 +297,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             }
         }
         
-        CartCache.shared.clearCache()
+        CacheManager.shared.clearCartCache()
         cartItems.removeAll()
 
         }
@@ -389,6 +388,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         // Load items from cache
         CacheManager.shared.restoreCartCacheFromDatabase(items: items)
         print("DEBUG loadCartItem: \(CacheManager.shared.getAllCartItems().count)")
+        
+        cartItems=[]
         for cartItem in CacheManager.shared.getAllCartItems() {
             cartItems.append(cartItem)
         }

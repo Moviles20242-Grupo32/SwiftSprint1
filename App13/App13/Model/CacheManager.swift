@@ -178,6 +178,10 @@ class CacheManager {
     
     // Restore Cart items from SQLite database and populate the cache
     func restoreCartCacheFromDatabase(items: [Item]) {
+        
+        cartCache.removeAllObjects()
+        cartCacheKeys.removeAll()
+        
         let selectQuery = "SELECT id, itemId, itemName, itemCost, itemDetails, itemImage, itemRatings, isAdded, timesOrdered, quantity FROM Cart;"
         var statement: OpaquePointer?
         
