@@ -171,16 +171,23 @@ struct CartView: View {
                         "timestamp": NSNumber(value: Date().timeIntervalSince1970)
                     ])
                     // Check if location services are disabled
-                    if homeData.noLocation {
-                        // Show alert to enable location services
-                        homeData.alertMessage = "Para continuar con el pedido, por favor activa la localización."
-                        homeData.showLocationAlert = true
-                    } else {
-                        // Proceed with order update
-                        print("Actualizando")
-                        homeData.updateOrder()
-                    }
                     
+                    if isConnected{
+                        if homeData.noLocation {
+                            // Show alert to enable location services
+                            homeData.alertMessage = "Para continuar con el pedido, por favor activa la localización."
+                            homeData.showLocationAlert = true
+                        } else {
+                            // Proceed with order update
+                            print("Actualizando")
+                            homeData.updateOrder()
+                        }
+                    }
+                    else{
+                        homeData.alertMessage = "No hay conexión a internet. No se puede actualizar la orden."
+                        homeData.showAlert = true
+                    }
+
                 }){
                     Text("Check out")
                         .font(.title2)
@@ -201,18 +208,18 @@ struct CartView: View {
         .alert(isPresented: $homeData.showAlert) {
                     Alert(title: Text("Error de conexión"), message: Text(homeData.alertMessage), dismissButton: .default(Text("OK")))
                 }
-        .alert(isPresented: $homeData.showLocationAlert) {
-            Alert(
-                title: Text("Localización Requerida"),
-                message: Text(homeData.alertMessage),
-                primaryButton: .default(Text("Ajustes")) {
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(url)
-                    }
-                },
-                secondaryButton: .cancel(Text("OK"))
-            )
-        }
+//        .alert(isPresented: $homeData.showLocationAlert) {
+//            Alert(
+//                title: Text("Localización Requerida"),
+//                message: Text(homeData.alertMessage),
+//                primaryButton: .default(Text("Ajustes")) {
+//                    if let url = URL(string: UIApplication.openSettingsURLString) {
+//                        UIApplication.shared.open(url)
+//                    }
+//                },
+//                secondaryButton: .cancel(Text("OK"))
+//            )
+//        }
     }
     
     func speak(elements: String) {

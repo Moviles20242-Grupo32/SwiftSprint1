@@ -132,6 +132,10 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                 return
             }
             
+            for item in self!.items{
+                print("Agregado \(item.item_name) \(item.isAdded)")
+            }
+            
             if let items = items {
                 DispatchQueue.main.async {
                     self?.items = items
@@ -200,6 +204,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         
         cartItems.forEach {(item) in
             price += Float(item.quantity) * Float(truncating: item.item.item_cost)
+            print(item.item.item_name)
         }
         
         return getPrice(value: price)
@@ -216,78 +221,73 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         // Adding a delay of 1 second before executing the rest of the code
         DispatchQueue.main.asyncAfter(deadline: .now()) { [weak self] in
             guard let self = self else { return }
+
+                
+        if cartItems.isEmpty {
             
-            if isConnected {
-                
-                if cartItems.isEmpty {
-                    
-                    let alertController = UIAlertController(
-                        title: "Carrito vacío",
-                        message: "Añada artículos al carrito para realizar su orden ",
-                        preferredStyle: .alert
-                    )
-                    
-                    // Add an OK button to the alert
-                    let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-                    alertController.addAction(okAction)
-                    
-                    // Present the alert
-                    if let viewController = UIApplication.shared.keyWindow?.rootViewController {
-                        viewController.present(alertController, animated: true, completion: nil)
-                    }
-                    
-                    return
-                    
-                }
-                
-                let userId = Auth.auth().currentUser!.uid
-                
-                var details: [[String: Any]] = []
-                var items_ids: [[String: Any]] = []
-                
-                cartItems.forEach { cart in
-                    details.append([
-                        "item_name": cart.item.item_name,
-                        "item_quantity": cart.quantity,
-                        "item_cost": cart.item.item_cost
-                    ])
-                    
-                    items_ids.append([
-                        "id":cart.item.id,
-                        "num":cart.quantity
-                    ])
-                }
-                
-                // Call DatabaseManager to set the order
-                DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation! .coordinate.latitude, longitude: userLocation!.coordinate.longitude)) { error in
-                    if let error = error {
-                        print("Error setting order: \(error)")
-                    }
-                }
-                
-                print(userId)
-                
-                for cart in cartItems {
-                    let index = getIndex(item: cart.item, isCartIndex: false)
-                    let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
-                        return cart.item.id == item1.id
-                    } ?? 0
-                    
-                    // Toggle the isAdded state
-                    items[index].toggleIsAdded()
-                    
-                    if items[index].id != filtered[filteredIndex].id {
-                        filtered[filteredIndex].toggleIsAdded()
-                    }
-                }
-                
-                CartCache.shared.clearCache()
-                cartItems.removeAll()
+            let alertController = UIAlertController(
+                title: "Carrito vacío",
+                message: "Añada artículos al carrito para realizar su orden ",
+                preferredStyle: .alert
+            )
+            
+            // Add an OK button to the alert
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            alertController.addAction(okAction)
+            
+            // Present the alert
+            if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+                viewController.present(alertController, animated: true, completion: nil)
             }
-            else{
-                self.alertMessage = "No hay conexión a internet. No se puede actualizar la orden."
-                self.showAlert = true
+            
+            return
+            
+        }
+        
+        let userId = Auth.auth().currentUser!.uid
+        
+        var details: [[String: Any]] = []
+        var items_ids: [[String: Any]] = []
+        
+        cartItems.forEach { cart in
+            details.append([
+                "item_name": cart.item.item_name,
+                "item_quantity": cart.quantity,
+                "item_cost": cart.item.item_cost
+            ])
+            
+            items_ids.append([
+                "id":cart.item.id,
+                "num":cart.quantity
+            ])
+        }
+        
+        // Call DatabaseManager to set the order
+        DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation! .coordinate.latitude, longitude: userLocation!.coordinate.longitude)) { error in
+            if let error = error {
+                print("Error setting order: \(error)")
             }
+        }
+        
+        print(userId)
+        
+        for cart in cartItems {
+            let index = getIndex(item: cart.item, isCartIndex: false)
+            let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
+                return cart.item.id == item1.id
+            } ?? 0
+            
+            // Toggle the isAdded state
+            items[index].toggleIsAdded()
+            
+            if items[index].id != filtered[filteredIndex].id {
+                filtered[filteredIndex].toggleIsAdded()
+            }
+        }
+        
+        CartCache.shared.clearCache()
+        cartItems.removeAll()
+
         }
     }
 
