@@ -235,7 +235,41 @@ class DatabaseManager: ObservableObject {
             }
         }
     }
+        
+    func saveElapsedTimeToCheckout(_ elapsedTime: NSNumber){
+        let timestamp = Timestamp()
+        let data: [String: Any] = [
+            "elapsed_time": elapsedTime,
+            "timestamp": timestamp,
+            "userId": currentUser?.id as Any
+        ]
+
+        db.collection("elapsed_time").addDocument(data: data) { error in
+            if let error = error {
+                print("DEBUG: Error saving elapsed time to checkout: \(error)")
+            } else {
+                print("DEBUG: Elapsed time to checkout successfully saved.")
+            }
+        }
+    }
     
+    func saveUserSpendings( amountSpent: NSNumber){
+        let timestamp = Timestamp()
+        let data: [String: Any] = [
+            "amount_spent": amountSpent,
+            "timestamp": timestamp,
+            "userId": currentUser?.id as Any
+        ]
+
+        db.collection("user_spendings").addDocument(data: data) { error in
+            if let error = error {
+                print("DEBUG: Error saving amount spent by user \(currentUser?.id ?? "???"): \(error)")
+            } else {
+                print("DEBUG: user spendings successfully saved.")
+            }
+        }
+    }
+
     func saveStarFilterUse() {
         let timestamp = Timestamp()
         let data: [String: Any] = [
@@ -244,6 +278,22 @@ class DatabaseManager: ObservableObject {
         ]
 
         db.collection("starFilterUse").addDocument(data: data) { error in
+            if let error = error {
+                print("Error saving star filter use: \(error)")
+            } else {
+                print("Star filter use successfully saved!")
+            }
+        }
+    }
+    
+    func saveRecentSearchFilterUse() {
+        let timestamp = Timestamp()
+        let data: [String: Any] = [
+            "timestamp": timestamp,
+            "userId": currentUser?.id as Any
+        ]
+
+        db.collection("recentSearchFilterUse").addDocument(data: data) { error in
             if let error = error {
                 print("Error saving star filter use: \(error)")
             } else {

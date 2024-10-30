@@ -1,5 +1,5 @@
 //
-//  CartCache.swift
+//  Cache.swift
 //  App13
 //
 //  Created by Juan Andres Jaramillo on 17/10/24.
@@ -8,24 +8,27 @@
 import Foundation
 import SQLite3
 
-class CartCache {
-    static let shared = CartCache() // Singleton instance
+class CacheManager {
+    static let shared = CacheManager() // Singleton instance
     
     private var db: OpaquePointer?
-    private let cache = NSCache<NSString, Cart>() // Cache to store Cart items
-    private var keys: [String] = [] // Array to store keys of cached items
+    private let cartCache = NSCache<NSString, Cart>() // Cache to store Cart items
+    private var cartCacheKeys: [String] = [] // Array to store keys of cached items
+    
+    private let favoriteCache = NSCache<NSString, Item>() //Cache to store the user's favorite item.
+    private let favoriteItemKey = "favoriteItemKey" // constant key to retrieve the favorite item stored in cache without the need to ask for the actual key.
     
     // Private initializer to enforce the singleton pattern
     private init() {
         setupDatabase()
     }
-    
+
     // This function sets up the SQLite database and creates the table if it doesn't exist
     private func setupDatabase() {
         // Define the database location
         let fileURL = try! FileManager.default
             .url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-            .appendingPathComponent("CartCache.sqlite")
+            .appendingPathComponent("CacheManager.sqlite")
         
         print(fileURL.path())
         
@@ -55,41 +58,61 @@ class CartCache {
             print("DEBUG: Error creating table")
         }
     }
-
-    // Add a Cart item to the cache + database
+    
+    // Add a Cart item to the cache
     func addCartItem(_ item: Cart) {
-        cache.setObject(item, forKey: item.id as NSString)
-        keys.append(item.id) // Track the key
+        cartCache.setObject(item, forKey: item.id as NSString)
+        cartCacheKeys.append(item.id) // Track the key
         saveToDatabase(cart: item) // Save item to SQLite database
-        print("DEBUG: Cart item added to Cache. Cache size: \(keys.count)")
+        print("DEBUG: cart item added to Cache. Cache size: \(cartCacheKeys.count)")
     }
     
-    // Retrieve a Cart ithttps://github.com/Moviles20242-Grupo32/SwiftSprint2/pull/46/filesem from the cache
+    // Adds the favorite item to the cache.
+    func addFavoriteItem(_ item: Item?) {
+        guard let item = item else {
+            print("DEBUG: Item is nil, not added to Cache.")
+            return
+        }
+        favoriteCache.setObject(item, forKey: favoriteItemKey as NSString)
+        print("DEBUG: Favorite Item added to Cache.")
+    }
+    
+    // Retrieve a Cart item from the cache
     func getCartItem(byId id: String) -> Cart? {
-        return cache.object(forKey: id as NSString)
+        return cartCache.object(forKey: id as NSString)
+    }
+    
+    // Retrieves the favorite item stored in cache.
+    func getFavoriteItem() -> Item? {
+        print("DEBUG: favorite item in cache: \(favoriteCache.object(forKey: favoriteItemKey as NSString)?.item_name)")
+        return favoriteCache.object(forKey: favoriteItemKey as NSString)
     }
     
     // Remove a Cart item from the cache
     func removeCartItem(byId id: String) {
-        cache.removeObject(forKey: id as NSString)
-        keys.removeAll { $0 == id } // Remove the key from the array
+        cartCache.removeObject(forKey: id as NSString)
+        cartCacheKeys.removeAll { $0 == id } // Remove the key from the array
         removeFromDatabase(byId: id) // Remove from SQLite database
-        print("DEBUG: cart item removed from Cache. Cache size: \(keys.count)")
+        print("DEBUG: cart item removed from Cache. Cache size: \(cartCacheKeys.count)")
     }
     
     // Clear all items from the cache
-    func clearCache() {
-        cache.removeAllObjects()
-        keys.removeAll() // Clear keys array
+    func clearCartCache() {
+        cartCache.removeAllObjects()
+        cartCacheKeys.removeAll() // Clear keys array
         clearDatabase()
         print("DEBUG: Cache cleared")
     }
     
-    // Retrieve all items in the cache (optional)
-    func getAllCartItems() -> [Cart] {
-        return keys.compactMap { cache.object(forKey: $0 as NSString) }
+    func clearFavoriteCache(){
+        favoriteCache.removeAllObjects()
+        print("DEBUG: Favorite Item removed from Cache.")
     }
     
+    // Retrieve all items in the cache (optional)
+    func getAllCartItems() -> [Cart] {
+        return cartCacheKeys.compactMap { cartCache.object(forKey: $0 as NSString) }
+    }
     
     // SQLite Operations
 
@@ -123,7 +146,7 @@ class CartCache {
         }
         sqlite3_finalize(statement)
     }
-
+    
     // Remove a Cart item from the SQLite database by its ID
     private func removeFromDatabase(byId id: String) {
         var statement: OpaquePointer?
@@ -141,7 +164,7 @@ class CartCache {
         }
         sqlite3_finalize(statement)
     }
-
+    
     // Clear all Cart items from the SQLite database
     private func clearDatabase() {
         let deleteAllQuery = "DELETE FROM Cart;"
@@ -152,7 +175,6 @@ class CartCache {
             print("DEBUG: Failed to clear cart items from database")
         }
     }
-
     
     // Restore Cart items from SQLite database and populate the cache
     func restoreCartCacheFromDatabase(items: [Item]) {
@@ -166,8 +188,6 @@ class CartCache {
                 let itemId = String(cString: sqlite3_column_text(statement, 1))
                 let quantity = Int(sqlite3_column_int(statement, 9))
                 
-                
-                
                 // Create the Item and Cart instances
                 if let item = items.first(where: { $0.id == itemId }){
                     print(194)
@@ -176,8 +196,8 @@ class CartCache {
                     cart.id = id // Use the saved ID
                     
                     // Restore the cart in the cache
-                    cache.setObject(cart, forKey: cart.id as NSString)
-                    keys.append(cart.id)
+                    cartCache.setObject(cart, forKey: cart.id as NSString)
+                    cartCacheKeys.append(cart.id)
                     
                     print("DEBUG: Restored cart with id \(id) from database")
                 } else {
@@ -239,4 +259,5 @@ class CartCache {
         // Finalize the statement to release memory
         sqlite3_finalize(statement)
     }
+    
 }

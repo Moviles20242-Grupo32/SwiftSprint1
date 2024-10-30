@@ -84,7 +84,7 @@ struct CartView: View {
                                     .lineLimit(2)
                                 
                                 HStack(spacing: 10){
-                                    Text(homeData.getPrice(value: Float(truncating: cart.item.item_cost)))
+                                    Text(homeData.getPrice(value: cart.item.item_cost))
                                         .font(.title2)
                                         .fontWeight(.heavy)
                                         .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
@@ -128,7 +128,7 @@ struct CartView: View {
                                 homeData.items[itemIndex].isAdded = false
                                 homeData.filtered[itemIndex].isAdded = false
                                 
-                                CartCache.shared.removeCartItem(byId: homeData.cartItems[index].id)
+                                CacheManager.shared.removeCartItem(byId: homeData.cartItems[index].id)
                                 homeData.cartItems.remove(at: index)
                                 
                             }){
@@ -160,12 +160,10 @@ struct CartView: View {
                 
                 Button(action: {
 
-                    let elapsedTime = Date().timeIntervalSince1970 - initialTime
+                    let elapsedTime = NSNumber(value: Date().timeIntervalSince1970 - initialTime)
                     Analytics.logEvent("time_to_checkout", parameters: [
-                        "elapsed_time": NSNumber(value: elapsedTime)
+                        "elapsed_time": elapsedTime
                     ])
-//                    print("DEBUG BQ: \(elapsedTime)")
-//                    print("DEBUG: startime: \(initialTime)")
                     
                     Analytics.logEvent("proceed_to_checkout", parameters: [
                         "timestamp": NSNumber(value: Date().timeIntervalSince1970)

@@ -39,6 +39,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     @Published var showAlert = false
     @Published var alertMessage = ""
+    var orderValue: Decimal = 0
     
     @Published var showLocationAlert = false
     
@@ -50,7 +51,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         super.init() // Call the super init first
         locationManager.delegate = self
         locationManager.requestWhenInUseAuthorization()
-//        loadCartItems() // load cart items saved in cache.
+        // loadCartItems() // load cart items saved in cache.
+        self.favorite = CacheManager.shared.getFavoriteItem()
         
     }
     
@@ -140,7 +142,16 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                 DispatchQueue.main.async {
                     self?.items = items
                     self?.filtered = items
-                    self?.favorite = self?.getFavorite()
+                    
+                    let favItem = CacheManager.shared.getFavoriteItem()
+                    if favItem != nil {
+                        self?.favorite = favItem
+                    }else{
+                        self?.favorite = self?.getFavorite()
+                    }
+                    if self?.favorite != nil {
+                        
+                    }
                     self?.loadCartItems()
                 }
             }
@@ -177,10 +188,10 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         if  items[index].isAdded {
             let newCartItem = Cart(item: items[index], quantity: 1)
             cartItems.append(newCartItem)
-            CartCache.shared.addCartItem(newCartItem) // Cache the item
+            CacheManager.shared.addCartItem(newCartItem) // Cache the item
         } else { //removes de item from the cart and the cache.
             let removedElement = cartItems.remove(at: getIndex(item: item, isCartIndex: true))
-            CartCache.shared.removeCartItem(byId: removedElement.id)
+            CacheManager.shared.removeCartItem(byId: removedElement.id)
         }
         
     }
@@ -198,23 +209,25 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         return isCartIndex ? cartIndex : index
     }
 
-    func calculateTotalPrice()->String{
+    func calculateTotalPrice() -> String {
         
-        var price : Float = 0
+        orderValue = 0
         
-        cartItems.forEach {(item) in
-            price += Float(item.quantity) * Float(truncating: item.item.item_cost)
-            print(item.item.item_name)
+        cartItems.forEach {(cartItem) in
+            let quantity = Decimal(cartItem.quantity)
+            let unit_cost = cartItem.item.item_cost.decimalValue
+            orderValue += quantity * unit_cost
         }
         
-        return getPrice(value: price)
+        return getPrice(value: orderValue as NSNumber)
     }
     
-    func getPrice(value: Float)->String{
+    func getPrice(value: NSNumber) -> String {
+        
         let format = NumberFormatter()
         format.numberStyle = .currency
         
-        return format.string(from: NSNumber(value: value)) ?? ""
+        return format.string(from: value) ?? ""
     }
     
     func updateOrder() {
@@ -299,21 +312,65 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     }
     
     func getFavorite() -> Item? {
-        return items.max(by: { $0.times_ordered < $1.times_ordered })
+        let favItem = items.max(by: { $0.times_ordered < $1.times_ordered })
+        CacheManager.shared.addFavoriteItem(favItem)
+        return favItem
     }
 
     func saveSearchUse(finalValue: String) {
         DatabaseManager.shared.saveSearchUse(finalValue: finalValue)
     }
     
+    func saveElapsedTimeToCheckout(_ elapsedTime: NSNumber){
+        if !cartItems.isEmpty {
+            DatabaseManager.shared.saveElapsedTimeToCheckout(elapsedTime)
+        }
+    }
+    
+    func saveUserSpendings(){
+        if orderValue != 0 {
+            DatabaseManager.shared.saveUserSpendings(amountSpent: orderValue as NSNumber)
+        }
+    }
+    
     func filterHighRatedItems(showHighRated: Bool) {
         if showHighRated {
+            saveStarFilterUse()
             filtered = items.filter { $0.item_ratings == "5" }
         } else {
             filtered = items // Reset to show all items
         }
     }
 
+    func filterLastSearch(showRecentSearch: Bool) {
+        if showRecentSearch {
+            saveRecentSearchFilterUse()
+            getRecentSearches()
+            if let lastSearch = self.recentSearches.last {
+                filtered = items.filter{$0.item_name.lowercased().contains(lastSearch.lowercased())}
+            }
+            else{
+                filtered=[]
+                let alertController = UIAlertController(
+                    title: "No hay busquedas recientes",
+                    message: "No se puede filtrar por busqueda reciente",
+                    preferredStyle: .alert
+                )
+                
+                // Add an OK button to the alert
+                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                alertController.addAction(okAction)
+                
+                // Present the alert
+                if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+                    viewController.present(alertController, animated: true, completion: nil)
+                }
+                
+            }
+        } else {
+            filtered = items // Reset to show all items
+        }
+    }
     
     //Function to increment or decrement the quantity to be ordered of an item in the cart.
     func incrementDecrementItemQuantity(index: Int, operation: String){
@@ -330,10 +387,9 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     // Function to retrieve cart items from the cache
     func loadCartItems() {
         // Load items from cache
-        print(items.count)
-        CartCache.shared.restoreCartCacheFromDatabase(items: items)
-        print("DEBUG loadCartItem: \(CartCache.shared.getAllCartItems().count)")
-        for cartItem in CartCache.shared.getAllCartItems() {
+        CacheManager.shared.restoreCartCacheFromDatabase(items: items)
+        print("DEBUG loadCartItem: \(CacheManager.shared.getAllCartItems().count)")
+        for cartItem in CacheManager.shared.getAllCartItems() {
             cartItems.append(cartItem)
         }
     }
@@ -342,15 +398,22 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     func clearCart() {
         cleanItems()
         cartItems.removeAll()
-        CartCache.shared.clearCache()
+        CacheManager.shared.clearCartCache()
     }
     
     func saveStarFilterUse() {
         DatabaseManager.shared.saveStarFilterUse()
     }
+    
+    func saveRecentSearchFilterUse() {
+        DatabaseManager.shared.saveRecentSearchFilterUse()
+    }
 
+    
+    // function to clean items and the favorite Cache.
     func cleanItems(){
         cartItems.forEach{ $0.item.toggleIsAdded() }
+        CacheManager.shared.clearFavoriteCache()
     }
     
     func getItem(id:String ) -> Item? {
@@ -377,9 +440,12 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         
         // Save the updated array back to UserDefaults
         UserDefaults.standard.set(recentSearches, forKey: "recentSearches")
+        print("Save #: ",recentSearches.count)
     }
     
     func getRecentSearches() {
         self.recentSearches = UserDefaults.standard.stringArray(forKey: "recentSearches") ?? []
+        print("Get #:",recentSearches.count)
     }
+    
 }
