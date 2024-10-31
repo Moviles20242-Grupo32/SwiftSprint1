@@ -6,7 +6,6 @@
 //  based on: https://github.com/pitt500/Pokedex/
 //  Credits: Pedro Rojas and project authors
 //  Licensed under MIT License
-//  This source file is part of
 //
 
 import SwiftUI
