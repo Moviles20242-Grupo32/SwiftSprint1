@@ -12,6 +12,7 @@ class CacheManager {
     static let shared = CacheManager() // Singleton instance
     
     private var db: OpaquePointer?
+    
     private let cartCache = NSCache<NSString, Cart>() // Cache to store Cart items
     private var cartCacheKeys: [String] = [] // Array to store keys of cached items
     
