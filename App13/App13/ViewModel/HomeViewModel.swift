@@ -326,6 +326,9 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func getFavorite() -> Item? {
         let favItem = items.max(by: { $0.times_ordered < $1.times_ordered })
+        if favItem?.times_ordered == 0 {
+            return nil
+        }
         CacheManager.shared.addFavoriteItem(favItem)
         return favItem
     }
