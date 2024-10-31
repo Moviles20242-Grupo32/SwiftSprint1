@@ -120,7 +120,6 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         guard isConnected else {
             DispatchQueue.main.async {
                 // No internet connection
-                self.loadCartItemsNoConnection()
                 self.items = []
                 self.filtered = []
                 self.favorite = nil
@@ -300,12 +299,26 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         
         CacheManager.shared.clearCartCache()
         cartItems.removeAll()
+            
+        let alertController = UIAlertController(
+            title: "Orden realizada",
+            message: "Su orden se ha realizado con éxito.",
+            preferredStyle: .alert
+        )
+        
+        // Add an OK button to the alert
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertController.addAction(okAction)
+        
+        // Present the alert
+        if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+            viewController.present(alertController, animated: true, completion: nil)
+        }
 
         }
     }
 
-
-        
+    
     func calculateTotalPrice() -> NSNumber {
         // Assuming there's logic here to calculate total price
         return cartItems.reduce(0) { $0 + $1.item.item_cost.floatValue * Float($1.quantity) } as NSNumber
@@ -389,19 +402,6 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
         // Load items from cache
         CacheManager.shared.restoreCartCacheFromDatabase(items: items)
-        print("DEBUG loadCartItem: \(CacheManager.shared.getAllCartItems().count)")
-        
-        cartItems=[]
-        for cartItem in CacheManager.shared.getAllCartItems() {
-            cartItems.append(cartItem)
-        }
-    }
-    
-    // Function to retrieve cart items from the cache
-    func loadCartItemsNoConnection() {
-    
-        // Load items from cache
-        CacheManager.shared.restoreCartCacheFromDatabaseNoConnection()
         print("DEBUG loadCartItem: \(CacheManager.shared.getAllCartItems().count)")
         
         cartItems=[]
