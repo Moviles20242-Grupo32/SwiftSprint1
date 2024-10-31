@@ -109,7 +109,7 @@ class CacheManager {
         print("DEBUG: Favorite Item removed from Cache.")
     }
     
-    // Retrieve all items in the cache (optional)
+    // Retrieve all items in the cache
     func getAllCartItems() -> [Cart] {
         return cartCacheKeys.compactMap { cartCache.object(forKey: $0 as NSString) }
     }
