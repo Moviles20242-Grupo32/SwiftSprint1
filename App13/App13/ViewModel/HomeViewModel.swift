@@ -299,12 +299,26 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         
         CacheManager.shared.clearCartCache()
         cartItems.removeAll()
+            
+        let alertController = UIAlertController(
+            title: "Orden realizada",
+            message: "Su orden se ha realizado con éxito.",
+            preferredStyle: .alert
+        )
+        
+        // Add an OK button to the alert
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertController.addAction(okAction)
+        
+        // Present the alert
+        if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+            viewController.present(alertController, animated: true, completion: nil)
+        }
 
         }
     }
 
-
-        
+    
     func calculateTotalPrice() -> NSNumber {
         // Assuming there's logic here to calculate total price
         return cartItems.reduce(0) { $0 + $1.item.item_cost.floatValue * Float($1.quantity) } as NSNumber
@@ -312,6 +326,9 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func getFavorite() -> Item? {
         let favItem = items.max(by: { $0.times_ordered < $1.times_ordered })
+        if favItem?.times_ordered == 0 {
+            return nil
+        }
         CacheManager.shared.addFavoriteItem(favItem)
         return favItem
     }

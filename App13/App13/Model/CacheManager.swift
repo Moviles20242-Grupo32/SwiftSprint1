@@ -12,6 +12,7 @@ class CacheManager {
     static let shared = CacheManager() // Singleton instance
     
     private var db: OpaquePointer?
+    
     private let cartCache = NSCache<NSString, Cart>() // Cache to store Cart items
     private var cartCacheKeys: [String] = [] // Array to store keys of cached items
     
@@ -109,7 +110,7 @@ class CacheManager {
         print("DEBUG: Favorite Item removed from Cache.")
     }
     
-    // Retrieve all items in the cache (optional)
+    // Retrieve all items in the cache
     func getAllCartItems() -> [Cart] {
         return cartCacheKeys.compactMap { cartCache.object(forKey: $0 as NSString) }
     }
