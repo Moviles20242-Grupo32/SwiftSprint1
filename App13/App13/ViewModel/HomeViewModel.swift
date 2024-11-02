@@ -120,7 +120,6 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         guard isConnected else {
             DispatchQueue.main.async {
                 // No internet connection
-                self.loadCartItemsNoConnection()
                 self.items = []
                 self.filtered = []
                 self.favorite = nil
@@ -389,19 +388,6 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
         // Load items from cache
         CacheManager.shared.restoreCartCacheFromDatabase(items: items)
-        print("DEBUG loadCartItem: \(CacheManager.shared.getAllCartItems().count)")
-        
-        cartItems=[]
-        for cartItem in CacheManager.shared.getAllCartItems() {
-            cartItems.append(cartItem)
-        }
-    }
-    
-    // Function to retrieve cart items from the cache
-    func loadCartItemsNoConnection() {
-    
-        // Load items from cache
-        CacheManager.shared.restoreCartCacheFromDatabaseNoConnection()
         print("DEBUG loadCartItem: \(CacheManager.shared.getAllCartItems().count)")
         
         cartItems=[]
