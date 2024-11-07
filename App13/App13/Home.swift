@@ -9,11 +9,18 @@ import SwiftUI
 import AVFoundation
 import Combine
 
+extension Color{
+    
+    static let darkBrown = Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0)
+    static let darkGreen = Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0)
+    static let lightBrown = Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0)
+    static let definedOrange = Color(.orange)
+}
+
 struct Home: View {
     @State private var synthesizer: AVSpeechSynthesizer?
-    @StateObject var HomeModel = HomeViewModel.shared
+    @ObservedObject var HomeModel = HomeViewModel.shared
     @State private var searchDebounceTimer: AnyCancellable?
-    @State private var typingStartTime: TimeInterval?
     @State var searchStartTime: TimeInterval?
     @StateObject var LocationModel = LocationViewModel.shared
     @State private var showHighRatedItems = false
@@ -28,13 +35,7 @@ struct Home: View {
                     ZStack {
                         // Gradient background with a rounded rectangle
                         RoundedRectangle(cornerRadius: 15)
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [Color.orange.opacity(1), Color.orange.opacity(0.5)]),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
+                            .fill(Color.definedOrange)
                             .frame(width: 350, height: 50)
                             .shadow(color: .gray.opacity(0.4), radius: 10, x: 0, y: 4) // Softer shadow for depth
 
@@ -45,7 +46,7 @@ struct Home: View {
                             Text("¡Come por menos con Foodies!")
                                 .font(.headline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
+                                .foregroundColor(Color.darkBrown)
                                 .multilineTextAlignment(.center)
                                 .lineLimit(1)
                                 .padding(.horizontal, 12)
@@ -63,7 +64,7 @@ struct Home: View {
                         }, label: {
                             Image(systemName: "cart")
                                 .font(.title)
-                                .foregroundColor(Color(.orange))
+                                .foregroundColor(.orange)
                         })
                         .padding(10)
                         
@@ -80,7 +81,7 @@ struct Home: View {
                                 .foregroundColor(.white)
                                 .frame(width: 20, height: 20)
                                 .padding(13)
-                                .background(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                                .background(Color.darkGreen)
                                 .clipShape(Circle())
                             
                         }).padding(10)
@@ -110,13 +111,13 @@ struct Home: View {
                         else{
                             Image(systemName: "location.fill")
                                 .font(.title2)
-                                .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                                .foregroundColor(Color.darkGreen)
                         }
                         
                         Text(LocationModel.userAddress)
                             .font(.caption)
                             .fontWeight(.heavy)
-                            .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                            .foregroundColor(Color.darkGreen)
                     }
                     
                     HStack{
@@ -125,10 +126,10 @@ struct Home: View {
                             
                             Image(systemName: "magnifyingglass")
                                 .font(.title2)
-                                .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                                .foregroundColor(Color.lightBrown)
                             
                             TextField("", text: $HomeModel.search)
-                                .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                                .foregroundColor(Color.lightBrown)
                                 .padding(.vertical, 10)
                                 .onChange(of: HomeModel.search) { newValue in
                                     searchDebounceTimer?.cancel()
@@ -152,7 +153,7 @@ struct Home: View {
                         .background(
                             RoundedRectangle(cornerRadius: 10) // Adjust corner radius as needed
                                 .fill(Color.white) // Background color of the rectangle
-                                .shadow(color: Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0), radius: 5, x: 0, y: 2) // Shadow parameters
+                                .shadow(color: Color.lightBrown, radius: 5, x: 0, y: 2) // Shadow parameters
                         )
                         .padding(.leading, 20)
                         .padding(.top,10)
@@ -173,7 +174,7 @@ struct Home: View {
                                 .frame(width: 15, height: 15)  // Set the width and height
                                 .foregroundColor(.white)
                                 .padding(10)
-                                .background(showHighRatedItems ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                                .background(showHighRatedItems ? Color.darkGreen : Color.definedOrange)
                                 .clipShape(Circle())
                         }
                         .padding(.leading, 2)
@@ -197,7 +198,7 @@ struct Home: View {
                                 .frame(width: 15, height: 15)  // Set the width and height
                                 .foregroundColor(.white)
                                 .padding(10)
-                                .background(showRecentSearchItems ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                                .background(showRecentSearchItems ? Color.darkGreen : Color.orange)
                                 .clipShape(Circle())
                         }
                         .padding(.trailing, 5)
@@ -212,7 +213,7 @@ struct Home: View {
                         Text("No se pueden mostrar las cajas disponibles porque no hay conexión a internet")
                             .font(.headline)
                             .multilineTextAlignment(.center)
-                            .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
+                            .foregroundColor(Color.darkBrown)
                             .padding()
                         
                         ProgressView()
@@ -245,7 +246,7 @@ struct Home: View {
                                                         .frame(width: 10, height: 10)  // Set the width and height
                                                         .foregroundColor(.white)
                                                         .padding(10)
-                                                        .background(item.isAdded ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                                                        .background(item.isAdded ? Color.darkGreen : Color.orange)
                                                         .clipShape(Circle())
                                                 })
                                             }

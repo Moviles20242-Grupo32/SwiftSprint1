@@ -19,6 +19,7 @@ struct ItemDetailView: View {
                     .font(.title)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
+                    .foregroundColor(Color.darkBrown)
                     .frame(maxWidth: .infinity, alignment: .center)
 
                 // Item Rating
@@ -57,7 +58,7 @@ struct ItemDetailView: View {
                 Text("$\(item.item_cost)")
                     .font(.largeTitle)
                     .fontWeight(.semibold)
-                    .foregroundColor(.green)
+                    .foregroundColor(Color.darkBrown)
                     .padding(.top)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
@@ -65,8 +66,10 @@ struct ItemDetailView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Posible contenido")
                         .font(.headline)
+                        .foregroundColor(Color.definedOrange)
                     Text(item.item_details)
                         .font(.body)
+                        .foregroundColor(Color.lightBrown)
                 }
                 
                 // Divider
@@ -77,16 +80,20 @@ struct ItemDetailView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Ingredientes")
                         .font(.headline)
+                        .foregroundColor(Color.definedOrange)
                     Text(item.item_ingredients)
                         .font(.body)
+                        .foregroundColor(Color.lightBrown)
                 }
                 
                 // Star Products
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Productos estrella")
                         .font(.headline)
+                        .foregroundColor(Color.darkGreen)
                     Text(item.item_starProducts)
                         .font(.body)
+                        .foregroundColor(Color.lightBrown)
                 }
                 
                 // Add to Cart Button
@@ -102,7 +109,7 @@ struct ItemDetailView: View {
                             .frame(width: 20, height: 20)
                             .foregroundColor(.white)
                             .padding(10)
-                            .background(item.isAdded ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                            .background(item.isAdded ? Color.darkGreen : Color.orange)
                             .clipShape(Circle())
                     }
                     Spacer()  // Center-align the button

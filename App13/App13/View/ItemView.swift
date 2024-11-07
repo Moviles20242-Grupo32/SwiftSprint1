@@ -41,7 +41,8 @@ struct ItemView: View {
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 4){
+                VStack(alignment: .leading, spacing: 4)
+                {
                     HStack{
                         Text(item.item_name)
                             .font(.title2)
@@ -52,7 +53,7 @@ struct ItemView: View {
                             ZStack {
                                 // Banner background
                                 RoundedRectangle(cornerRadius: 10)  // Creates a rectangle with rounded corners
-                                    .fill(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))  // Fill color for the banner
+                                    .fill(Color.darkGreen)  // Fill color for the banner
                                     .frame(width: 70, height: 25)  // Adjust the banner size as needed
                                 
                                 // Text inside the banner
@@ -67,13 +68,13 @@ struct ItemView: View {
                     
                     Text(item.item_details)
                         .font(.caption)
-                        .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                        .foregroundColor(Color.lightBrown)
                         .lineLimit(2)
                     
                     HStack{
                         ForEach(1...5, id: \.self){ index in
                             Image(systemName: "star.fill")
-                                .foregroundColor(index <= Int(item.item_ratings) ?? 0 ? Color(.orange): Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                                .foregroundColor(index <= Int(item.item_ratings) ?? 0 ? Color(.orange): Color.lightBrown)
                             }
                     }
                         

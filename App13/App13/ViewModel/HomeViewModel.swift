@@ -212,7 +212,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         
         orderValue = 0
         
-        cartItems.forEach {(cartItem) in
+        for index in cartItems.indices {
+            let cartItem = cartItems[index]
             let quantity = Decimal(cartItem.quantity)
             let unit_cost = cartItem.item.item_cost.decimalValue
             orderValue += quantity * unit_cost
@@ -261,7 +262,9 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         var details: [[String: Any]] = []
         var items_ids: [[String: Any]] = []
         
-        cartItems.forEach { cart in
+        for index in cartItems.indices {
+            let cart = cartItems[index]
+            
             details.append([
                 "item_name": cart.item.item_name,
                 "item_quantity": cart.quantity,
@@ -269,10 +272,11 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             ])
             
             items_ids.append([
-                "id":cart.item.id,
-                "num":cart.quantity
+                "id": cart.item.id,
+                "num": cart.quantity
             ])
         }
+
         
         // Call DatabaseManager to set the order
         DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation! .coordinate.latitude, longitude: userLocation!.coordinate.longitude)) { error in
@@ -431,7 +435,10 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     // function to clean items and the favorite Cache.
     func cleanItems(){
-        cartItems.forEach{ $0.item.toggleIsAdded() }
+        for index in cartItems.indices {
+            cartItems[index].item.toggleIsAdded()
+        }
+
         CacheManager.shared.clearFavoriteCache()
     }
     

@@ -8,7 +8,6 @@
 import SwiftUI
 import SDWebImageSwiftUI
 import AVFoundation
-import FirebaseAnalytics
 
 struct CartView: View {
     
@@ -42,7 +41,7 @@ struct CartView: View {
                             .foregroundColor(.white)
                             .frame(width: 20, height: 20)
                             .padding(13)
-                            .background(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                            .background(Color.darkGreen)
                             .clipShape(Circle())
                         
                     }).padding(.trailing, 175)
@@ -80,7 +79,7 @@ struct CartView: View {
                                 
                                 Text(cart.item.item_details)
                                     .fontWeight(.semibold)
-                                    .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                                    .foregroundColor(Color.lightBrown)
                                     .lineLimit(2)
                                 
                                 HStack(spacing: 10){
@@ -101,10 +100,10 @@ struct CartView: View {
                                     
                                     Text("\(cart.quantity)")
                                         .fontWeight(.heavy)
-                                        .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                                        .foregroundColor(Color.lightBrown)
                                         .padding(.vertical, 5)
                                         .padding(.horizontal,10)
-                                        .background(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0).opacity(0.06))
+                                        .background(Color.lightBrown.opacity(0.06))
                                     
                                     Button(action: {
                                         homeData.incrementDecrementItemQuantity(index: homeData.getIndex(item: cart.item, isCartIndex: true), operation: "+")
@@ -159,15 +158,6 @@ struct CartView: View {
                 .padding([.top,.horizontal])
                 
                 Button(action: {
-
-                    let elapsedTime = NSNumber(value: Date().timeIntervalSince1970 - initialTime)
-                    Analytics.logEvent("time_to_checkout", parameters: [
-                        "elapsed_time": elapsedTime
-                    ])
-                    
-                    Analytics.logEvent("proceed_to_checkout", parameters: [
-                        "timestamp": NSNumber(value: Date().timeIntervalSince1970)
-                    ])
                     // Check if location services are disabled
                     
                     if isConnected{
@@ -194,7 +184,7 @@ struct CartView: View {
                         .padding(.vertical)
                         .frame(width: UIScreen.main.bounds.width - 30)
                         .background(
-                            Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0)
+                            Color.darkGreen
                         )
                         .cornerRadius(15)
                 }
