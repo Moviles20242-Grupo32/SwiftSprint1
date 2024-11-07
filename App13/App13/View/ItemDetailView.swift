@@ -1,0 +1,117 @@
+//
+//  Untitled.swift
+//  App13
+//
+//  Created by Daniela Uribe on 7/11/24.
+//
+
+import SwiftUI
+
+struct ItemDetailView: View {
+    let item: Item  // Replace `Item` with the actual type of your item model
+    @StateObject var homeData = HomeViewModel.shared // Make sure to pass your view model when initializing this view
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Item Name
+                Text(item.item_name)
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity, alignment: .center)
+
+                // Item Rating
+                HStack {
+                    ForEach(1...5, id: \.self) { index in
+                        Image(systemName: "star.fill")
+                            .foregroundColor(index <= (Int(item.item_ratings) ?? 0) ? Color.orange : Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                
+                // Item Image
+                CacheAsyncImage(url: URL(string: item.item_image)!) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 150, height: 150)
+                            .clipped()
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    case .failure(_):
+                        Image(systemName: "xmark.octagon")
+                            .frame(width: 150, height: 150)
+                            .foregroundColor(.red)
+                    case .empty:
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .red))
+                            .frame(width: 150, height: 150)
+                    @unknown default:
+                        Image(systemName: "questionmark")
+                    }
+                }
+                
+                // Item Cost
+                Text("$\(item.item_cost)")
+                    .font(.largeTitle)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.green)
+                    .padding(.top)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                // Item Details - "Posible contenido"
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Posible contenido")
+                        .font(.headline)
+                    Text(item.item_details)
+                        .font(.body)
+                }
+                
+                // Divider
+                Divider()
+                    .padding(.vertical)
+                
+                // Item Ingredients
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Ingredientes")
+                        .font(.headline)
+                    Text(item.item_ingredients)
+                        .font(.body)
+                }
+                
+                // Star Products
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Productos estrella")
+                        .font(.headline)
+                    Text(item.item_starProducts)
+                        .font(.body)
+                }
+                
+                // Add to Cart Button
+                HStack {
+                    Spacer()  // Center-align the button
+                    Button(action: {
+                        let searchStartTime = Date().timeIntervalSince1970
+                        homeData.addToCart(item: item)
+                    }) {
+                        Image(systemName: item.isAdded ? "checkmark" : "plus")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(item.isAdded ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                            .clipShape(Circle())
+                    }
+                    Spacer()  // Center-align the button
+                }
+                .padding(.top, 20)
+            }
+            .padding()
+        }
+    }
+}
+
+

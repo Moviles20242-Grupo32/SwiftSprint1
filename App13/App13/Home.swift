@@ -8,7 +8,6 @@
 import SwiftUI
 import AVFoundation
 import Combine
-import FirebaseAnalytics
 
 struct Home: View {
     @State private var synthesizer: AVSpeechSynthesizer?
@@ -139,10 +138,7 @@ struct Home: View {
                                         .delay(for: .seconds(0.8), scheduler: RunLoop.main)
                                         .sink { finalValue in
                                             if !finalValue.isEmpty {
-                                                // Log the event after 0.8 seconds of inactivity
-                                                Analytics.logEvent("search_completed", parameters: [
-                                                    "search_term": finalValue
-                                                ])
+                                                
                                                 print("Event logged: search_term = \(finalValue)")
                                                 
                                                 HomeModel.saveSearchUse(finalValue: finalValue)
@@ -224,44 +220,45 @@ struct Home: View {
                         Spacer()
                         
                     }
-                    else{
+                    else {
                         ScrollView(.vertical, showsIndicators: false, content: {
-                            VStack(spacing:5){
-                                ForEach(HomeModel.filtered){item in
-                                    HStack{
-                                        
-                                        ItemView(item: item, favoriteName: HomeModel.favorite?.item_name ?? "")
-                                            .padding(15)
-                                        
-                                        Spacer()
-                                            .frame(width: 10)
-                                        
-                                        Button(action: {
-                                            searchStartTime = Date().timeIntervalSince1970
-                                            Analytics.logEvent("product_selection_started", parameters: [
-                                                "timestamp": searchStartTime.map { NSNumber(value: $0) } ?? NSNumber(value: 0)
-                                            ])
-                                            
-                                            HomeModel.addToCart(item: item)
-                                        }, label: {
-                                            Image(systemName: item.isAdded ? "checkmark" : "plus")
-                                                .resizable()  // Make the image resizable
-                                                .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
-                                                .frame(width: 10, height: 10)  // Set the width and height
-                                                .foregroundColor(.white)
-                                                .padding(10)
-                                                .background(item.isAdded ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
-                                                .clipShape(Circle())
-                                        })
-                                    }
-                                    .padding(.trailing, 10)
+                            VStack(spacing: 5) {
+                                ForEach(HomeModel.filtered) { item in
+                                    NavigationLink(
+                                        destination: ItemDetailView(item: item), // Destination is the ItemDetailView
+                                        label: {
+                                            HStack {
+                                                ItemView(item: item, favoriteName: HomeModel.favorite?.item_name ?? "")
+                                                    .padding(15)
+                                                
+                                                Spacer()
+                                                    .frame(width: 10)
+                                                
+                                                Button(action: {
+                                                    searchStartTime = Date().timeIntervalSince1970
+                                                    
+                                                    HomeModel.addToCart(item: item)
+                                                }, label: {
+                                                    Image(systemName: item.isAdded ? "checkmark" : "plus")
+                                                        .resizable()  // Make the image resizable
+                                                        .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
+                                                        .frame(width: 10, height: 10)  // Set the width and height
+                                                        .foregroundColor(.white)
+                                                        .padding(10)
+                                                        .background(item.isAdded ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                                                        .clipShape(Circle())
+                                                })
+                                            }
+                                            .padding(.trailing, 10)
+                                        }
+                                    )
+                                    .buttonStyle(PlainButtonStyle()) // Ensure the button does not interfere with the navigation link
                                 }
                             }
                             .padding(.top, 10)
                         })
                     }
-                    
-                    
+
                 }
                 
         }
