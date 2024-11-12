@@ -228,18 +228,17 @@ struct Home: View {
                     */
                     
                     ZStack {
-                        // Banner background
-                        RoundedRectangle(cornerRadius: 10)  // Creates a rectangle with rounded corners
-                            .fill(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))  // Fill color for the banner
-                            .frame(width: 125, height: 25)  // Adjust the banner size as needed
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                            .frame(width: 125, height: 25)
                         
                         NavigationLink(destination: {
-                            TrackOrderView()
+                            OrdersHistoryView()
                         }, label: {
                             Text("Pedidos en Curso")
-                                .font(.caption)  // Set the font size
-                                .foregroundColor(.white)  // Set the text color
-                                .bold()  // Make the text bold if desired
+                                .font(.caption)
+                                .foregroundColor(.white)
+                                .bold()
                         })
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
