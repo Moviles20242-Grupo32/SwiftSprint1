@@ -208,6 +208,43 @@ struct Home: View {
                         .padding(.top,10)
                     }
                     
+                    // Track Order
+                    /*
+                    HStack{
+                        NavigationLink(destination: {
+                            TrackOrderView()
+                        }, label: {
+                            Text("Pedidos en Curso")
+                                .font(.caption)
+                                .fontWeight(.heavy)
+                                .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                        })
+                        .padding(10)
+                        .background(.ultraThickMaterial)
+                        .cornerRadius(10)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 20)
+                    */
+                    
+                    ZStack {
+                        // Banner background
+                        RoundedRectangle(cornerRadius: 10)  // Creates a rectangle with rounded corners
+                            .fill(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))  // Fill color for the banner
+                            .frame(width: 125, height: 25)  // Adjust the banner size as needed
+                        
+                        NavigationLink(destination: {
+                            TrackOrderView()
+                        }, label: {
+                            Text("Pedidos en Curso")
+                                .font(.caption)  // Set the font size
+                                .foregroundColor(.white)  // Set the text color
+                                .bold()  // Make the text bold if desired
+                        })
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 20)
+                    
                     
                     if HomeModel.items.isEmpty{
                         
