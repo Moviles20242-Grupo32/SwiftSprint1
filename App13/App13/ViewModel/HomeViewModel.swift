@@ -48,7 +48,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     @Published var recentSearches: [String] = []
     
     // Track Order
-    @Published var areThereActiveOrders = false
+    @Published var activeOrders: [Cart] = []
     
     override private init() {
         super.init() // Call the super init first
@@ -275,6 +275,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
                     "id":cart.item.id,
                     "num":cart.quantity
                 ])
+                
+                self.activeOrders.append(cart)
             }
             
             // Call DatabaseManager to set the order
@@ -302,8 +304,6 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             
             CacheManager.shared.clearCartCache()
             cartItems.removeAll()
-            
-            areThereActiveOrders = true // Track Order
             
             let alertController = UIAlertController(
                 title: "Orden realizada",
