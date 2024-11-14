@@ -228,6 +228,7 @@ struct Home: View {
                     */
                     
                     ZStack {
+                        
                         // Banner background
                         RoundedRectangle(cornerRadius: 10)  // Creates a rectangle with rounded corners
                             .fill(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))  // Fill color for the banner

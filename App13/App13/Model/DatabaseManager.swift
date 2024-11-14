@@ -69,53 +69,7 @@ class DatabaseManager: ObservableObject {
             completion(items, nil)
         }
     }
-    
-//func fetchItems(completion: @escaping ([Item]?, Error?) -> Void) {
-//    
-//    let monitor = NWPathMonitor()
-//    let queue = DispatchQueue.global(qos: .background)
-//    // Check network connectivity before fetching data
-//    print("Im in")
-//    monitor.pathUpdateHandler = { path in
-//        print("Estoy en path")
-//        if path.status == .satisfied {
-//            print("Ya más cerca")
-//            // Internet connection is available, proceed with data fetching
-//            self.db.collection("Items").getDocuments { (snap, err) in
-//                
-//                if let err = err {
-//                    completion(nil, err)
-//                    return
-//                }
-//                
-//                guard let itemData = snap else {
-//                    completion(nil, nil)
-//                    return
-//                }
-//                
-//                let items = itemData.documents.compactMap { (doc) -> Item? in
-//                    let id = doc.documentID
-//                    let name = doc.get("item_name") as? String ?? ""
-//                    let cost = doc.get("item_cost") as? NSNumber ?? 0
-//                    let ratings = doc.get("item_ratings") as? String ?? ""
-//                    let image = doc.get("item_image") as? String ?? ""
-//                    let details = doc.get("item_details") as? String ?? ""
-//                    let times = doc.get("times_ordered") as? Int ?? 0
-//                    
-//                    return Item(id: id, item_name: name, item_cost: cost, item_details: details, item_image: image, item_ratings: ratings, times_ordered: times)
-//                }
-//                completion(items, nil)
-//            }
-//        } else {
-//            print("morí")
-//            // No internet connection
-//            let noInternetError = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No internet connection. Please try again later."])
-//            completion(nil, noInternetError)
-//        }
-//    }
-//}
-    
-    
+
     // Method to delete an order for a specific user based on userId
     func deleteOrder(for userId: String, completion: @escaping (Error?) -> Void) {
         let db = Firestore.firestore()
@@ -124,17 +78,7 @@ class DatabaseManager: ObservableObject {
             completion(err)
         }
     }
-    
-//    // Method to update/set order details
-//    func setOrder(for userId: String, details: [[String: Any]], ids: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
-//        let db = Firestore.firestore()
-//        
-//        // Access the "Orders" collection and delete the document for the given userId
-//        db.collection("Orders").document(userId).delete { (err) in
-//            // Return any error encountered to the completion handler
-//            completion(err)
-//        }
-//    }
+
         
     // Method to update/set order details
     func setOrder(for userId: String, details: [[String: Any]], ids: [[String: Any]], totalCost: NSNumber, location: GeoPoint, completion: @escaping (Error?) -> Void) {
