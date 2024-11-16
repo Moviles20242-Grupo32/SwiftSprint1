@@ -34,7 +34,7 @@ class CacheManager {
             .url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
             .appendingPathComponent("CacheManager.sqlite")
         
-        print(fileURL.path())
+        print("Ruta: ",fileURL.path())
         
         // Open the database
         if sqlite3_open(fileURL.path, &db) != SQLITE_OK {
@@ -64,8 +64,8 @@ class CacheManager {
             id TEXT PRIMARY KEY,
             itemId TEXT,
             itemName TEXT,
-            itemCost REAL,
             quantity INTEGER
+        
         );
         """
         
@@ -99,6 +99,7 @@ class CacheManager {
     // Add a Order item to the cache
     func addOrder(_ item: [Cart]) {
         lastOrderCache.setObject(item as NSArray, forKey: lastOrderKey as NSString)
+        saveLastOrder(order: item)
         print("DEBUG: Last order saved to cache.")
     }
     
@@ -146,7 +147,8 @@ class CacheManager {
     
     // Clear the last order from the cache
     func clearLastOrder() {
-        lastOrderCache.removeObject(forKey: lastOrderKey as NSString)
+        lastOrderCache.removeAllObjects()
+        clearLastOrderFromDatabase()
         print("DEBUG: Last order cleared from cache.")
     }
     
@@ -190,11 +192,12 @@ class CacheManager {
     
     // Save the last order to the SQLite database
     func saveLastOrder(order: [Cart]) {
+        clearLastOrderFromDatabase()
         for item in order {
             var statement: OpaquePointer?
             
             let insertQuery = """
-            INSERT INTO LastOrder (id, itemId, itemName, itemCost, quantity) VALUES (?, ?, ?, ?, ?);
+            INSERT INTO LastOrder (id, itemId, itemName, quantity) VALUES (?, ?, ?, ?);
             """
             
             if sqlite3_prepare_v2(db, insertQuery, -1, &statement, nil) == SQLITE_OK {
@@ -202,8 +205,7 @@ class CacheManager {
                 sqlite3_bind_text(statement, 1, (item.id as NSString).utf8String, -1, nil)
                 sqlite3_bind_text(statement, 2, (item.item.id as NSString).utf8String, -1, nil)
                 sqlite3_bind_text(statement, 3, (item.item.item_name as NSString).utf8String, -1, nil)
-                sqlite3_bind_double(statement, 4, item.item.item_cost.doubleValue)
-                sqlite3_bind_int(statement, 5, Int32(item.quantity))
+                sqlite3_bind_int(statement, 4, Int32(item.quantity))
                 
                 if sqlite3_step(statement) == SQLITE_DONE {
                     print("DEBUG: Successfully saved last order to database")
@@ -237,13 +239,56 @@ class CacheManager {
     // Clear all Cart items from the SQLite database
     private func clearDatabase() {
         let deleteAllQuery = "DELETE FROM Cart;"
-        
         if sqlite3_exec(db, deleteAllQuery, nil, nil, nil) == SQLITE_OK {
             print("DEBUG: Cleared all cart items from database")
         } else {
             print("DEBUG: Failed to clear cart items from database")
         }
     }
+    
+    // Clear the last order from the SQLite database
+    func clearLastOrderFromDatabase() {
+        let deleteQuery = "DELETE FROM LastOrder;"
+        if sqlite3_exec(db, deleteQuery, nil, nil, nil) == SQLITE_OK {
+            print("DEBUG: Cleared last order from database")
+        } else {
+            print("DEBUG: Failed to clear last order from database")
+        }
+    }
+    
+    // Retrieve the last order from SQLite
+    func getLastOrderFromDatabase(items: [Item]) -> [Cart]? {
+        var order: [Cart] = []
+        let selectQuery = "SELECT id, itemId, itemName, quantity FROM LastOrder;"
+        var statement: OpaquePointer?
+        
+        if sqlite3_prepare_v2(db, selectQuery, -1, &statement, nil) == SQLITE_OK {
+            while sqlite3_step(statement) == SQLITE_ROW {
+                let id = String(cString: sqlite3_column_text(statement, 0))
+                let itemId = String(cString: sqlite3_column_text(statement, 1))
+                let itemName = String(cString: sqlite3_column_text(statement, 2))
+                let quantity = Int(sqlite3_column_int(statement, 3))
+                
+                // Create the Item and Cart instances
+                if let item = items.first(where: { $0.id == itemId }){
+                    let cart = Cart(item: item, quantity: quantity) // item is now non-optional
+                    
+                    order.append(cart)
+                    
+                    print("DEBUG: Restored cart with id \(id) from database")
+                } else {
+                    print("DEBUG: Item with id \(itemId) not found.")
+                }
+                
+            }
+        } else {
+            print("DEBUG: Failed to retrieve last order from database")
+        }
+        
+        sqlite3_finalize(statement)
+        return order.isEmpty ? nil : order
+    }
+    
     
     // Restore Cart items from SQLite database and populate the cache
     func restoreCartCacheFromDatabase(items: [Item]) {
@@ -281,6 +326,19 @@ class CacheManager {
             print("DEBUG: Failed to restore cart items from database")
         }
         sqlite3_finalize(statement)
+    }
+    
+    // Restore Cart items from SQLite database and populate the cache
+    func restoreLastOrderCacheFromDatabase(items: [Item]) {
+        
+        lastOrderCache.removeAllObjects()
+        if let lastOrder = getLastOrderFromDatabase(items: items) {
+            lastOrderCache.setObject(lastOrder as NSArray, forKey: lastOrderKey as NSString)
+            print("DEBUG: Restored last order from database")
+        }else {
+            print("DEBUG: No last order found in database.")
+        }
+        
     }
     
     // Function to count the rows in a specified table
@@ -331,5 +389,4 @@ class CacheManager {
         // Finalize the statement to release memory
         sqlite3_finalize(statement)
     }
-    
 }

@@ -377,8 +377,19 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     func getLastOrder() -> [Cart]? {
         guard let lastOrder = CacheManager.shared.getLastOrder() else {
-            print("DEBUG: No last order found in cache.")
-            return nil
+            print("DEBUG: No last order found in cache. Attempting to restore from database...")
+            
+            // If not in cache, restore it from the database
+            CacheManager.shared.restoreLastOrderCacheFromDatabase(items: items)
+            
+            // Try fetching again after restoration
+            if let restoredOrder = CacheManager.shared.getLastOrder() {
+                print("DEBUG: Successfully restored last order from database.")
+                return restoredOrder
+            } else {
+                print("DEBUG: No last order found even after database restoration.")
+                return nil
+            }
         }
         return lastOrder
     }
