@@ -302,6 +302,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             if items[index].id != filtered[filteredIndex].id {
                 filtered[filteredIndex].toggleIsAdded()
             }
+            
+            activeOrders.append(cart)
         }
         
         CacheManager.shared.clearCartCache()
