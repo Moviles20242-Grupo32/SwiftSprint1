@@ -19,6 +19,15 @@ class LocationViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     var locationTimer: DispatchSourceTimer?
     
+    // Computed properties to get latitude and longitude
+    var latitude: Double? {
+        return userLocation?.coordinate.latitude
+    }
+
+    var longitude: Double? {
+        return userLocation?.coordinate.longitude
+    }
+    
     let targetLocation = CLLocation(latitude: 4.6026, longitude: -74.0661) //ejemplo ubicacion
     
     static let shared = LocationViewModel()

@@ -205,6 +205,42 @@ struct Home: View {
                         .padding(.top,10)
                     }
                     
+                    // Track Order
+                    /*
+                    HStack{
+                        NavigationLink(destination: {
+                            TrackOrderView()
+                        }, label: {
+                            Text("Pedidos en Curso")
+                                .font(.caption)
+                                .fontWeight(.heavy)
+                                .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                        })
+                        .padding(10)
+                        .background(.ultraThickMaterial)
+                        .cornerRadius(10)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 20)
+                    */
+                    
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
+                            .frame(width: 125, height: 25)
+                        
+                        NavigationLink(destination: {
+                            OrdersHistoryView()
+                        }, label: {
+                            Text("Pedidos en Curso")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                                .bold()
+                        })
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 20)
+                    
                     
                     if HomeModel.items.isEmpty{
                         
