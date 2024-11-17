@@ -54,9 +54,7 @@ class CacheManager {
         itemRatings TEXT,
         isAdded INTEGER,
         timesOrdered INTEGER,
-        quantity INTEGER,
-        item_ingredients TEXT,
-        item_starProducts TEXT
+        quantity INTEGER
         );
         """
         
@@ -165,13 +163,11 @@ class CacheManager {
     private func saveToDatabase(cart: Cart) {
         var statement: OpaquePointer?
         
-        print("guardando")
         let insertQuery = """
-        INSERT INTO Cart (id, itemId, itemName, itemCost, itemDetails, itemImage, itemRatings, isAdded, timesOrdered, quantity, item_ingredients, item_starProducts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO Cart (id, itemId, itemName, itemCost, itemDetails, itemImage, itemRatings, isAdded, timesOrdered, quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """
         
         if sqlite3_prepare_v2(db, insertQuery, -1, &statement, nil) == SQLITE_OK {
-            print("guardando2")
             // Bind the parameters
             sqlite3_bind_text(statement, 1, (cart.id as NSString).utf8String, -1, nil)
             sqlite3_bind_text(statement, 2, (cart.item.id as NSString).utf8String, -1, nil)
@@ -183,8 +179,6 @@ class CacheManager {
             sqlite3_bind_int(statement, 8, cart.item.isAdded ? 1 : 0)
             sqlite3_bind_int(statement, 9, Int32(cart.item.times_ordered))
             sqlite3_bind_int(statement, 10, Int32(cart.quantity))
-            sqlite3_bind_text(statement, 11, (cart.item.item_ingredients as NSString).utf8String, -1, nil)
-            sqlite3_bind_text(statement, 12, (cart.item.item_starProducts as NSString).utf8String, -1, nil)
             
             if sqlite3_step(statement) == SQLITE_DONE {
                 print("DEBUG: Successfully added cart to database")
@@ -193,10 +187,6 @@ class CacheManager {
                 print("DEBUG: Failed to add cart to database. Error: \(errorMessage)")
             }
         }
-        else {
-           let errorMessage = String(cString: sqlite3_errmsg(db))
-           print("DEBUG: Failed to prepare statement. Error: \(errorMessage)")
-       }
         sqlite3_finalize(statement)
     }
     
@@ -306,7 +296,7 @@ class CacheManager {
         cartCache.removeAllObjects()
         cartCacheKeys.removeAll()
         
-        let selectQuery = "SELECT id, itemId, itemName, itemCost, itemDetails, itemImage, itemRatings, isAdded, timesOrdered, quantity, item_ingredients, item_starProducts FROM Cart;"
+        let selectQuery = "SELECT id, itemId, itemName, itemCost, itemDetails, itemImage, itemRatings, isAdded, timesOrdered, quantity FROM Cart;"
         var statement: OpaquePointer?
         
         if sqlite3_prepare_v2(db, selectQuery, -1, &statement, nil) == SQLITE_OK {

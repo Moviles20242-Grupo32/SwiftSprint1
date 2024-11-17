@@ -36,8 +36,23 @@ class LocationViewModel: ObservableObject {
         self.locationManager = locationManager
         observeLocation()
         startLocationExtraction()
+//        sendTestNotification()
     }
     
+//    func sendTestNotification() {
+//        let content = UNMutableNotificationContent()
+//        content.title = "Test Notification"
+//        content.body = "This is a test notification."
+//        
+//        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+//        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+//        
+//        UNUserNotificationCenter.current().add(request) { error in
+//            if let error = error {
+//                print("Error adding notification: \(error.localizedDescription)")
+//            }
+//        }
+//    }
     
     func startLocationExtraction() {
         let queue = DispatchQueue.global(qos: .background)

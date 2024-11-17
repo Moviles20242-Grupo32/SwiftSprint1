@@ -40,7 +40,7 @@ struct TrackOrderView: View {
             
             Spacer()
             
-            Text("Debes contar con conexión a internet para que la App funcione correctamente")
+            Text("Debe contar con conexión a internet para que la App funcione correctamente")
                 .font(.headline)
                 .multilineTextAlignment(.center)
                 .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
@@ -60,7 +60,7 @@ struct TrackOrderView: View {
                     
                 }
                 
-                if !HomeModel.activeOrders.isEmpty {
+                if HomeModel.areThereActiveOrders {
                     Annotation("Foodie", coordinate: foodie){
                         Image(systemName: "bicycle.circle.fill")
                             .font(.system(size: 40))

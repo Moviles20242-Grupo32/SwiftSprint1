@@ -8,19 +8,13 @@
 import SwiftUI
 import AVFoundation
 import Combine
-
-extension Color{
-    
-    static let darkBrown = Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0)
-    static let darkGreen = Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0)
-    static let lightBrown = Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0)
-    static let definedOrange = Color(.orange)
-}
+import FirebaseAnalytics
 
 struct Home: View {
     @State private var synthesizer: AVSpeechSynthesizer?
-    @ObservedObject var HomeModel = HomeViewModel.shared
+    @StateObject var HomeModel = HomeViewModel.shared
     @State private var searchDebounceTimer: AnyCancellable?
+    @State private var typingStartTime: TimeInterval?
     @State var searchStartTime: TimeInterval?
     @StateObject var LocationModel = LocationViewModel.shared
     @State private var showHighRatedItems = false
@@ -35,7 +29,13 @@ struct Home: View {
                     ZStack {
                         // Gradient background with a rounded rectangle
                         RoundedRectangle(cornerRadius: 15)
-                            .fill(Color.definedOrange)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.orange.opacity(1), Color.orange.opacity(0.5)]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
                             .frame(width: 350, height: 50)
                             .shadow(color: .gray.opacity(0.4), radius: 10, x: 0, y: 4) // Softer shadow for depth
 
@@ -46,7 +46,7 @@ struct Home: View {
                             Text("¡Come por menos con Foodies!")
                                 .font(.headline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(Color.darkBrown)
+                                .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                                 .multilineTextAlignment(.center)
                                 .lineLimit(1)
                                 .padding(.horizontal, 12)
@@ -64,7 +64,7 @@ struct Home: View {
                         }, label: {
                             Image(systemName: "cart")
                                 .font(.title)
-                                .foregroundColor(.orange)
+                                .foregroundColor(Color(.orange))
                         })
                         .padding(10)
                         
@@ -81,7 +81,7 @@ struct Home: View {
                                 .foregroundColor(.white)
                                 .frame(width: 20, height: 20)
                                 .padding(13)
-                                .background(Color.darkGreen)
+                                .background(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
                                 .clipShape(Circle())
                             
                         }).padding(10)
@@ -111,13 +111,13 @@ struct Home: View {
                         else{
                             Image(systemName: "location.fill")
                                 .font(.title2)
-                                .foregroundColor(Color.darkGreen)
+                                .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
                         }
                         
                         Text(LocationModel.userAddress)
                             .font(.caption)
                             .fontWeight(.heavy)
-                            .foregroundColor(Color.darkGreen)
+                            .foregroundColor(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))
                     }
                     
                     HStack{
@@ -126,10 +126,10 @@ struct Home: View {
                             
                             Image(systemName: "magnifyingglass")
                                 .font(.title2)
-                                .foregroundColor(Color.lightBrown)
+                                .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
                             
                             TextField("", text: $HomeModel.search)
-                                .foregroundColor(Color.lightBrown)
+                                .foregroundColor(Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0))
                                 .padding(.vertical, 10)
                                 .onChange(of: HomeModel.search) { newValue in
                                     searchDebounceTimer?.cancel()
@@ -139,7 +139,10 @@ struct Home: View {
                                         .delay(for: .seconds(0.8), scheduler: RunLoop.main)
                                         .sink { finalValue in
                                             if !finalValue.isEmpty {
-                                                
+                                                // Log the event after 0.8 seconds of inactivity
+                                                Analytics.logEvent("search_completed", parameters: [
+                                                    "search_term": finalValue
+                                                ])
                                                 print("Event logged: search_term = \(finalValue)")
                                                 
                                                 HomeModel.saveSearchUse(finalValue: finalValue)
@@ -153,7 +156,7 @@ struct Home: View {
                         .background(
                             RoundedRectangle(cornerRadius: 10) // Adjust corner radius as needed
                                 .fill(Color.white) // Background color of the rectangle
-                                .shadow(color: Color.lightBrown, radius: 5, x: 0, y: 2) // Shadow parameters
+                                .shadow(color: Color(red: 143/255.0, green: 120/255.0, blue: 111/255.0), radius: 5, x: 0, y: 2) // Shadow parameters
                         )
                         .padding(.leading, 20)
                         .padding(.top,10)
@@ -174,7 +177,7 @@ struct Home: View {
                                 .frame(width: 15, height: 15)  // Set the width and height
                                 .foregroundColor(.white)
                                 .padding(10)
-                                .background(showHighRatedItems ? Color.darkGreen : Color.definedOrange)
+                                .background(showHighRatedItems ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
                                 .clipShape(Circle())
                         }
                         .padding(.leading, 2)
@@ -198,7 +201,7 @@ struct Home: View {
                                 .frame(width: 15, height: 15)  // Set the width and height
                                 .foregroundColor(.white)
                                 .padding(10)
-                                .background(showRecentSearchItems ? Color.darkGreen : Color.orange)
+                                .background(showRecentSearchItems ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
                                 .clipShape(Circle())
                         }
                         .padding(.trailing, 5)
@@ -230,15 +233,14 @@ struct Home: View {
                         RoundedRectangle(cornerRadius: 10)  // Creates a rectangle with rounded corners
                             .fill(Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0))  // Fill color for the banner
                             .frame(width: 125, height: 25)  // Adjust the banner size as needed
-
                         
                         NavigationLink(destination: {
-                            OrdersHistoryView()
+                            TrackOrderView()
                         }, label: {
                             Text("Pedidos en Curso")
-                                .font(.caption)
-                                .foregroundColor(.white)
-                                .bold()
+                                .font(.caption)  // Set the font size
+                                .foregroundColor(.white)  // Set the text color
+                                .bold()  // Make the text bold if desired
                         })
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -252,7 +254,7 @@ struct Home: View {
                         Text("No se pueden mostrar las cajas disponibles porque no hay conexión a internet")
                             .font(.headline)
                             .multilineTextAlignment(.center)
-                            .foregroundColor(Color.darkBrown)
+                            .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                             .padding()
                         
                         ProgressView()
@@ -260,45 +262,44 @@ struct Home: View {
                         Spacer()
                         
                     }
-                    else {
+                    else{
                         ScrollView(.vertical, showsIndicators: false, content: {
-                            VStack(spacing: 5) {
-                                ForEach(HomeModel.filtered) { item in
-                                    NavigationLink(
-                                        destination: ItemDetailView(item: item), // Destination is the ItemDetailView
-                                        label: {
-                                            HStack {
-                                                ItemView(item: item, favoriteName: HomeModel.favorite?.item_name ?? "")
-                                                    .padding(15)
-                                                
-                                                Spacer()
-                                                    .frame(width: 10)
-                                                
-                                                Button(action: {
-                                                    searchStartTime = Date().timeIntervalSince1970
-                                                    
-                                                    HomeModel.addToCart(item: item)
-                                                }, label: {
-                                                    Image(systemName: item.isAdded ? "checkmark" : "plus")
-                                                        .resizable()  // Make the image resizable
-                                                        .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
-                                                        .frame(width: 10, height: 10)  // Set the width and height
-                                                        .foregroundColor(.white)
-                                                        .padding(10)
-                                                        .background(item.isAdded ? Color.darkGreen : Color.orange)
-                                                        .clipShape(Circle())
-                                                })
-                                            }
-                                            .padding(.trailing, 10)
-                                        }
-                                    )
-                                    .buttonStyle(PlainButtonStyle()) // Ensure the button does not interfere with the navigation link
+                            VStack(spacing:5){
+                                ForEach(HomeModel.filtered){item in
+                                    HStack{
+                                        
+                                        ItemView(item: item, favoriteName: HomeModel.favorite?.item_name ?? "")
+                                            .padding(15)
+                                        
+                                        Spacer()
+                                            .frame(width: 10)
+                                        
+                                        Button(action: {
+                                            searchStartTime = Date().timeIntervalSince1970
+                                            Analytics.logEvent("product_selection_started", parameters: [
+                                                "timestamp": searchStartTime.map { NSNumber(value: $0) } ?? NSNumber(value: 0)
+                                            ])
+                                            
+                                            HomeModel.addToCart(item: item)
+                                        }, label: {
+                                            Image(systemName: item.isAdded ? "checkmark" : "plus")
+                                                .resizable()  // Make the image resizable
+                                                .aspectRatio(contentMode: .fit)  // Maintain the aspect ratio
+                                                .frame(width: 10, height: 10)  // Set the width and height
+                                                .foregroundColor(.white)
+                                                .padding(10)
+                                                .background(item.isAdded ? Color(red: 49/255.0, green: 67/255.0, blue: 65/255.0) : Color.orange)
+                                                .clipShape(Circle())
+                                        })
+                                    }
+                                    .padding(.trailing, 10)
                                 }
                             }
                             .padding(.top, 10)
                         })
                     }
-
+                    
+                    
                 }
                 
         }
