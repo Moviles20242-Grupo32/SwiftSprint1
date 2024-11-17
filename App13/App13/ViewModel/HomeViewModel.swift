@@ -95,7 +95,6 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             address += ", "
             address += safeData.first?.locality ?? ""
             
-            print(address)
             self.userAdress = address
         }
     }
@@ -166,9 +165,50 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         }
     }
     
-    func addToCart(item:Item){
+    func addLastOrderToCart() {
+        // Retrieve the last order from the cache
+        guard let lastOrder = getLastOrder() else {
+            print("DEBUG: No last order found to add to cart.")
+            let alertController = UIAlertController(
+                title: "No hay ordenes recientes",
+                message: "No ha hecho ninguna orden reciente",
+                preferredStyle: .alert
+            )
+            
+            // Add an OK button to the alert
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            alertController.addAction(okAction)
+            
+            // Present the alert
+            if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+                viewController.present(alertController, animated: true, completion: nil)
+            }
+            return
+        }
         
-        print("Añadido")
+        // Loop through each item in the last order and add it to the cart
+        for cartItem in lastOrder {
+            // Find the index of the item in the items list
+            let index = getIndex(item: cartItem.item, isCartIndex: false)
+            
+            // Ensure the item exists in `items` before proceeding
+            if index >= 0 && index < items.count {
+                
+                // Check if the item is already in the cart
+                if !cartItems.contains(where: { $0.item.id == cartItem.item.id }) {
+                    // If not in the cart, add it to cartItems and cache
+                    addToCart(item: cartItem.item)
+                }
+                
+            } else {
+                print("DEBUG: Item not found in items list for \(cartItem.item.item_name)")
+            }
+        }
+        
+        print("DEBUG: Last order items added to cart successfully.")
+    }
+    
+    func addToCart(item:Item){
         
         let index = getIndex(item: item, isCartIndex: false)
         let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
@@ -180,11 +220,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         if items[index].id != filtered[filteredIndex].id { //is this necessary?
             filtered[filteredIndex].toggleIsAdded()
         }
-        
-        // Ensure favorite is updated if it's the same item
-        //        if favorite?.id == item.id {
-        //            favorite?.isAdded = items[index].isAdded
-        //        }
+
         
         // Adds the added item to the cartitems and the cache.
         if  items[index].isAdded {
@@ -197,6 +233,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         }
         
     }
+    
+    
     
     func getIndex(item: Item, isCartIndex: Bool)->Int{
         
@@ -306,6 +344,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             }
             
             CacheManager.shared.clearCartCache()
+            CacheManager.shared.addOrder(cartItems)
             cartItems.removeAll()
                 
             let alertController = UIAlertController(
@@ -454,6 +493,24 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         return nil
     }
     
+    func getLastOrder() -> [Cart]? {
+        guard let lastOrder = CacheManager.shared.getLastOrder() else {
+            print("DEBUG: No last order found in cache. Attempting to restore from database...")
+            
+            // If not in cache, restore it from the database
+            CacheManager.shared.restoreLastOrderCacheFromDatabase(items: items)
+            
+            // Try fetching again after restoration
+            if let restoredOrder = CacheManager.shared.getLastOrder() {
+                print("DEBUG: Successfully restored last order from database.")
+                return restoredOrder
+            } else {
+                print("DEBUG: No last order found even after database restoration.")
+                return nil
+            }
+        }
+        return lastOrder
+    }
     
     func saveSearch(finalValue: String) {
         // Get current searches from UserDefaults

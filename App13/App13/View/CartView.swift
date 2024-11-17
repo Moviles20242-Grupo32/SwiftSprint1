@@ -61,6 +61,18 @@ struct CartView: View {
                         .foregroundColor(Color(red: 69/255.0, green: 39/255.0, blue: 13/255.0))
                     
                     Spacer()
+                    
+                    Button(action: {
+                        homeData.addLastOrderToCart()
+                    }) {
+                        Text("Añadir último pedido")
+                            .font(.system(size: 12, weight: .bold))
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 12)
+                            .background(Color.orange.opacity(0.8))
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
                 }
                 .padding()
                 
