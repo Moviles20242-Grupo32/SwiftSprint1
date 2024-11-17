@@ -208,6 +208,7 @@ struct Home: View {
                         .padding(.top,10)
                     }
                     
+<<<<<<< HEAD
                     // Track Order
                     /*
                     HStack{
@@ -246,6 +247,8 @@ struct Home: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 20)
                     
+=======
+>>>>>>> parent of 01508d2 (Merge branch 'main' into feature/microoptimization)
                     
                     if HomeModel.items.isEmpty{
                         

@@ -33,7 +33,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     @Published var favorite: Item? = nil
     
     @Published var cartItems: [Cart] = []
-    //    @Published var ordered = false
+//    @Published var ordered = false
     
     @State private var synthesizer: AVSpeechSynthesizer?
     
@@ -46,10 +46,14 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     static let shared = HomeViewModel()
     
     @Published var recentSearches: [String] = []
+<<<<<<< HEAD
     
     // Track Order
     @Published var areThereActiveOrders = false
     
+=======
+
+>>>>>>> parent of 01508d2 (Merge branch 'main' into feature/microoptimization)
     override private init() {
         super.init() // Call the super init first
         locationManager.delegate = self
@@ -222,6 +226,14 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             filtered[filteredIndex].toggleIsAdded()
         }
         
+<<<<<<< HEAD
+=======
+        // Ensure favorite is updated if it's the same item
+//        if favorite?.id == item.id {
+//            favorite?.isAdded = items[index].isAdded
+//        }
+
+>>>>>>> parent of 01508d2 (Merge branch 'main' into feature/microoptimization)
         // Adds the added item to the cartitems and the cache.
         if  items[index].isAdded {
             let newCartItem = Cart(item: items[index], quantity: 1)
@@ -246,7 +258,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         
         return isCartIndex ? cartIndex : index
     }
-    
+
     func calculateTotalPrice() -> String {
         
         orderValue = 0
@@ -272,30 +284,40 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         // Adding a delay of 1 second before executing the rest of the code
         DispatchQueue.main.asyncAfter(deadline: .now()) { [weak self] in
             guard let self = self else { return }
+
+                
+        if cartItems.isEmpty {
             
+            let alertController = UIAlertController(
+                title: "Carrito vacío",
+                message: "Añada artículos al carrito para realizar su orden ",
+                preferredStyle: .alert
+            )
             
-            if cartItems.isEmpty {
-                
-                let alertController = UIAlertController(
-                    title: "Carrito vacío",
-                    message: "Añada artículos al carrito para realizar su orden ",
-                    preferredStyle: .alert
-                )
-                
-                // Add an OK button to the alert
-                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-                alertController.addAction(okAction)
-                
-                // Present the alert
-                if let viewController = UIApplication.shared.keyWindow?.rootViewController {
-                    viewController.present(alertController, animated: true, completion: nil)
-                }
-                
-                return
-                
+            // Add an OK button to the alert
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            alertController.addAction(okAction)
+            
+            // Present the alert
+            if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+                viewController.present(alertController, animated: true, completion: nil)
             }
             
+<<<<<<< HEAD
             let userId = Auth.auth().currentUser!.uid
+=======
+            return
+            
+        }
+        
+        let userId = Auth.auth().currentUser!.uid
+        
+        var details: [[String: Any]] = []
+        var items_ids: [[String: Any]] = []
+        
+        for index in cartItems.indices {
+            let cart = cartItems[index]
+>>>>>>> parent of 01508d2 (Merge branch 'main' into feature/microoptimization)
             
             var details: [[String: Any]] = []
             var items_ids: [[String: Any]] = []
@@ -359,7 +381,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             
         }
     }
-    
+
     
     func calculateTotalPrice() -> NSNumber {
         // Assuming there's logic here to calculate total price
@@ -374,6 +396,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         CacheManager.shared.addFavoriteItem(favItem)
         return favItem
     }
+<<<<<<< HEAD
     
     func getLastOrder() -> [Cart]? {
         guard let lastOrder = CacheManager.shared.getLastOrder() else {
@@ -394,6 +417,9 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         return lastOrder
     }
     
+=======
+
+>>>>>>> parent of 01508d2 (Merge branch 'main' into feature/microoptimization)
     func saveSearchUse(finalValue: String) {
         DatabaseManager.shared.saveSearchUse(finalValue: finalValue)
     }
@@ -418,7 +444,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             filtered = items // Reset to show all items
         }
     }
-    
+
     func filterLastSearch(showRecentSearch: Bool) {
         if showRecentSearch {
             saveRecentSearchFilterUse()
@@ -463,7 +489,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     // Function to retrieve cart items from the cache
     func loadCartItems() {
-        
+    
         // Load items from cache
         CacheManager.shared.restoreCartCacheFromDatabase(items: items)
         print("DEBUG loadCartItem: \(CacheManager.shared.getAllCartItems().count)")
@@ -488,7 +514,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     func saveRecentSearchFilterUse() {
         DatabaseManager.shared.saveRecentSearchFilterUse()
     }
-    
+
     
     // function to clean items and the favorite Cache.
     func cleanItems(){
@@ -505,7 +531,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         return nil
     }
     
-    
+
     func saveSearch(finalValue: String) {
         // Get current searches from UserDefaults
         var recentSearches = UserDefaults.standard.stringArray(forKey: "recentSearches") ?? []
