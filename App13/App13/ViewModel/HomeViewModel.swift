@@ -262,68 +262,67 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             
             let userId = Auth.auth().currentUser!.uid
 
-        var details: [[String: Any]] = []
-        var items_ids: [[String: Any]] = []
-        
-        for index in cartItems.indices {
-            let cart = cartItems[index]
+            var details: [[String: Any]] = []
+            var items_ids: [[String: Any]] = []
             
-            details.append([
-                "item_name": cart.item.item_name,
-                "item_quantity": cart.quantity,
-                "item_cost": cart.item.item_cost
-            ])
-            
-            items_ids.append([
-                "id": cart.item.id,
-                "num": cart.quantity
-            ])
-        }
-
-        
-        // Call DatabaseManager to set the order
-        DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation! .coordinate.latitude, longitude: userLocation!.coordinate.longitude)) { error in
-            if let error = error {
-                print("Error setting order: \(error)")
+            for index in cartItems.indices {
+                let cart = cartItems[index]
+                
+                details.append([
+                    "item_name": cart.item.item_name,
+                    "item_quantity": cart.quantity,
+                    "item_cost": cart.item.item_cost
+                ])
+                
+                items_ids.append([
+                    "id": cart.item.id,
+                    "num": cart.quantity
+                ])
             }
-        }
-        
-        print(userId)
-        
-        for cart in cartItems {
-            let index = getIndex(item: cart.item, isCartIndex: false)
-            let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
-                return cart.item.id == item1.id
-            } ?? 0
+
             
-            // Toggle the isAdded state
-            items[index].toggleIsAdded()
-            
-            if items[index].id != filtered[filteredIndex].id {
-                filtered[filteredIndex].toggleIsAdded()
+            // Call DatabaseManager to set the order
+            DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation! .coordinate.latitude, longitude: userLocation!.coordinate.longitude)) { error in
+                if let error = error {
+                    print("Error setting order: \(error)")
+                }
             }
             
-            activeOrders.append(cart)
-        }
-        
-        CacheManager.shared.clearCartCache()
-        cartItems.removeAll()
+            print(userId)
             
-        let alertController = UIAlertController(
-            title: "Orden realizada",
-            message: "Su orden se ha realizado con éxito.",
-            preferredStyle: .alert
-        )
-        
-        // Add an OK button to the alert
-        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-        alertController.addAction(okAction)
-        
-        // Present the alert
-        if let viewController = UIApplication.shared.keyWindow?.rootViewController {
-            viewController.present(alertController, animated: true, completion: nil)
-        }
-
+            for cart in cartItems {
+                let index = getIndex(item: cart.item, isCartIndex: false)
+                let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
+                    return cart.item.id == item1.id
+                } ?? 0
+                
+                // Toggle the isAdded state
+                items[index].toggleIsAdded()
+                
+                if items[index].id != filtered[filteredIndex].id {
+                    filtered[filteredIndex].toggleIsAdded()
+                }
+                
+                activeOrders.append(cart)
+            }
+            
+            CacheManager.shared.clearCartCache()
+            cartItems.removeAll()
+                
+            let alertController = UIAlertController(
+                title: "Orden realizada",
+                message: "Su orden se ha realizado con éxito.",
+                preferredStyle: .alert
+            )
+            
+            // Add an OK button to the alert
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            alertController.addAction(okAction)
+            
+            // Present the alert
+            if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+                viewController.present(alertController, animated: true, completion: nil)
+            }
         }
     }
     
