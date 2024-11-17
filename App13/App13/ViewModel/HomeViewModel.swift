@@ -282,12 +282,11 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
 
             
             // Call DatabaseManager to set the order
-            DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation! .coordinate.latitude, longitude: userLocation!.coordinate.longitude)) { error in
-                if let error = error {
-                    print("Error setting order: \(error)")
-                }
-            }
-            
+            DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation?.coordinate.latitude ?? 0, longitude: userLocation?.coordinate.longitude ?? 0)) { error in
+                        if let error = error {
+                            print("Error setting order: \(error)")
+                        }
+                    }
             print(userId)
             
             for cart in cartItems {
