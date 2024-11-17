@@ -60,9 +60,11 @@ class DatabaseManager: ObservableObject {
                 let image = doc.get("item_image") as! String
                 let details = doc.get("item_details") as! String
                 let times = doc.get("times_ordered") as! Int
+                let item_ingredients = doc.get("item_ingredients") as! String
+                let item_starProducts = doc.get("item_starProducts") as! String
                 
                 // Create and return an Item object
-                return Item(id: id, item_name: name, item_cost: cost, item_details: details, item_image: image, item_ratings: ratings, times_ordered: times, isAdded: false)
+                return Item(id: id, item_name: name, item_cost: cost, item_details: details, item_image: image, item_ratings: ratings, times_ordered: times, isAdded: false, item_ingredients: item_ingredients, item_starProducts: item_starProducts)
             }
             
             // Pass the parsed items to the completion handler

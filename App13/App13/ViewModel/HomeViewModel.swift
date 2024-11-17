@@ -48,7 +48,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     @Published var recentSearches: [String] = []
     
     // Track Order
-    @Published var areThereActiveOrders = false
+    @Published var activeOrders: [Cart] = []
     
     override private init() {
         super.init() // Call the super init first
@@ -251,7 +251,8 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         
         orderValue = 0
         
-        cartItems.forEach {(cartItem) in
+        for index in cartItems.indices {
+            let cartItem = cartItems[index]
             let quantity = Decimal(cartItem.quantity)
             let unit_cost = cartItem.item.item_cost.decimalValue
             orderValue += quantity * unit_cost
@@ -296,67 +297,71 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
             }
             
             let userId = Auth.auth().currentUser!.uid
+
+        var details: [[String: Any]] = []
+        var items_ids: [[String: Any]] = []
+        
+        for index in cartItems.indices {
+            let cart = cartItems[index]
             
-            var details: [[String: Any]] = []
-            var items_ids: [[String: Any]] = []
+            details.append([
+                "item_name": cart.item.item_name,
+                "item_quantity": cart.quantity,
+                "item_cost": cart.item.item_cost
+            ])
             
-            cartItems.forEach { cart in
-                details.append([
-                    "item_name": cart.item.item_name,
-                    "item_quantity": cart.quantity,
-                    "item_cost": cart.item.item_cost
-                ])
-                
-                items_ids.append([
-                    "id":cart.item.id,
-                    "num":cart.quantity
-                ])
+            items_ids.append([
+                "id": cart.item.id,
+                "num": cart.quantity
+            ])
+        }
+
+        
+        // Call DatabaseManager to set the order
+        DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation! .coordinate.latitude, longitude: userLocation!.coordinate.longitude)) { error in
+            if let error = error {
+                print("Error setting order: \(error)")
             }
+        }
+        
+        print(userId)
+        
+        for cart in cartItems {
+            let index = getIndex(item: cart.item, isCartIndex: false)
+            let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
+                return cart.item.id == item1.id
+            } ?? 0
             
-            // Call DatabaseManager to set the order
-            DatabaseManager.shared.setOrder(for: userId, details: details, ids: items_ids,  totalCost: calculateTotalPrice(), location: GeoPoint(latitude: userLocation! .coordinate.latitude, longitude: userLocation!.coordinate.longitude)) { error in
-                if let error = error {
-                    print("Error setting order: \(error)")
-                }
+            // Toggle the isAdded state
+            items[index].toggleIsAdded()
+            
+            if items[index].id != filtered[filteredIndex].id {
+                filtered[filteredIndex].toggleIsAdded()
             }
+           
+            activeOrders.append(cart)
+        }
+        
+        CacheManager.shared.clearCartCache()
+        CacheManager.shared.addOrder(cartItems)                      
+        cartItems.removeAll()
+
             
-            print(userId)
-            
-            for cart in cartItems {
-                let index = getIndex(item: cart.item, isCartIndex: false)
-                let filteredIndex = self.filtered.firstIndex { (item1) -> Bool in
-                    return cart.item.id == item1.id
-                } ?? 0
-                
-                // Toggle the isAdded state
-                items[index].toggleIsAdded()
-                
-                if items[index].id != filtered[filteredIndex].id {
-                    filtered[filteredIndex].toggleIsAdded()
-                }
-            }
-            
-            CacheManager.shared.clearCartCache()
-            CacheManager.shared.addOrder(cartItems)
-            cartItems.removeAll()
-            
-            areThereActiveOrders = true // Track Order
-            
-            let alertController = UIAlertController(
-                title: "Orden realizada",
-                message: "Su orden se ha realizado con éxito.",
-                preferredStyle: .alert
-            )
-            
-            // Add an OK button to the alert
-            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-            alertController.addAction(okAction)
-            
-            // Present the alert
-            if let viewController = UIApplication.shared.keyWindow?.rootViewController {
-                viewController.present(alertController, animated: true, completion: nil)
-            }
-            
+        let alertController = UIAlertController(
+            title: "Orden realizada",
+            message: "Su orden se ha realizado con éxito.",
+            preferredStyle: .alert
+        )
+        
+        // Add an OK button to the alert
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertController.addAction(okAction)
+        
+        // Present the alert
+        if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+            viewController.present(alertController, animated: true, completion: nil)
+        }
+
         }
     }
     
@@ -492,7 +497,10 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     
     // function to clean items and the favorite Cache.
     func cleanItems(){
-        cartItems.forEach{ $0.item.toggleIsAdded() }
+        for index in cartItems.indices {
+            cartItems[index].item.toggleIsAdded()
+        }
+
         CacheManager.shared.clearFavoriteCache()
     }
     
