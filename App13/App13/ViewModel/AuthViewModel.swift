@@ -21,7 +21,6 @@ var currentUser: User?
 @MainActor
 class AuthViewModel: ObservableObject {
     @Published var userSession: FirebaseAuth.User?
-//    @Published var currentUser: User?
     @Published var incorrectUserPassword: Bool = false
     @Published var userExists: Bool = false
     @Published var HomeModel = HomeViewModel.shared
