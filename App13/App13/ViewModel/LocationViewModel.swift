@@ -42,7 +42,7 @@ class LocationViewModel: ObservableObject {
     func startLocationExtraction() {
         let queue = DispatchQueue.global(qos: .background)
         locationTimer = DispatchSource.makeTimerSource(queue: queue)
-        locationTimer?.schedule(deadline: .now(), repeating: 300) // 300 seconds (5 minutes)
+        locationTimer?.schedule(deadline: .now(), repeating: 60)
         
         locationTimer?.setEventHandler { [weak self] in
             self?.extractLocation()
@@ -113,6 +113,8 @@ class LocationViewModel: ObservableObject {
     }
     
     func sendNotification() {
+        
+        DatabaseManager.shared.saveCloseFoodies()
         let content = UNMutableNotificationContent()
         content.title = "Estás cerca!"
         content.body = "Hay un restaurante Foodies a 2km de ti"
