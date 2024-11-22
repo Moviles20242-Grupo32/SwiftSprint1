@@ -12,18 +12,11 @@ struct RegistrationView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
-    @State private var errorMessageName = ""
-    @State private var errorMessageEmail = ""
-    @State private var errorMessagePassword = ""
-    @State private var errorMessageUserExists = ""
+    
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var viewModel: AuthViewModel
     @Environment(\.presentationMode) var present
-
-    let fullNameLimit = 15
-    let emailLimit = 50
-    let passwordLimit = 20
-
+    
     var body: some View {
         GeometryReader { geometry in
             ScrollView {
@@ -38,7 +31,7 @@ struct RegistrationView: View {
                         Spacer()
                     }
                     .padding(.horizontal)
-
+                    
                     // App Logo
                     Image("AppLogo")
                         .resizable()
@@ -46,52 +39,48 @@ struct RegistrationView: View {
                         .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
                         .clipShape(RoundedRectangle(cornerRadius: 15)) // Adjust the corner radius to match the rounding you need
                         .padding(.vertical, 32)
-
+                    
                     // Form fields
                     VStack(spacing: 24) {
                         InputView(text: $fullName, title: "Nombre", placeHolder: "Ingresa tu nombre")
                             .onChange(of: fullName) { newValue in
-                                if fullName.count > fullNameLimit {
-                                    fullName = String(fullName.prefix(fullNameLimit))
+                                if fullName.count > viewModel.fullNameLimit + 1  {
+                                    fullName = String(fullName.prefix(viewModel.fullNameLimit))
                                 }
                             }
-                        if !errorMessageName.isEmpty {
-                            Text(errorMessageName)
+                        if !viewModel.errorMessageName.isEmpty {
+                            Text(viewModel.errorMessageName)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundColor(.red)
                                 .font(.subheadline)
                                 .padding(.top, 8)
                         }
-
+                        
                         InputView(text: $email, title: "Correo electrónico", placeHolder: "nombre@ejemplo.com")
                             .onChange(of: email) { newValue in
-                                if email.count > emailLimit {
-                                    email = String(email.prefix(emailLimit))
+                                if email.count > viewModel.emailLimit + 1 {
+                                    email = String(email.prefix(viewModel.emailLimit))
                                 }
                             }
                             .autocapitalization(.none)
-                        if !errorMessageEmail.isEmpty {
-                            Text(errorMessageEmail)
+                        if !viewModel.errorMessageEmail.isEmpty {
+                            Text(viewModel.errorMessageEmail)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundColor(.red)
                                 .font(.subheadline)
                                 .padding(.top, 8)
                         }
-
+                        
                         InputView(text: $password, title: "Contraseña", placeHolder: "Ingresa una contraseña", isSecureField: true)
-                            .onChange(of: password) { newValue in
-                                if password.count > passwordLimit {
-                                    password = String(password.prefix(passwordLimit))
-                                }
-                            }
-                        if !errorMessagePassword.isEmpty {
-                            Text(errorMessagePassword)
+                        
+                        if !viewModel.errorMessagePassword.isEmpty {
+                            Text(viewModel.errorMessagePassword)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundColor(.red)
                                 .font(.subheadline)
                                 .padding(.top, 8)
                         }
-
+                        
                         ZStack(alignment: .trailing) {
                             InputView(text: $confirmPassword, title: "Confirmar contraseña", placeHolder: "Confirma la contraseña", isSecureField: true)
                             if !password.isEmpty && !confirmPassword.isEmpty {
@@ -103,11 +92,11 @@ struct RegistrationView: View {
                     }
                     .padding(.horizontal)
                     .padding(.top, 12)
-
+                    
                     // Sign Up button
                     Button {
                         Task {
-                            // Sign up logic
+                            try await viewModel.createUser(withEmail: email, password: password, fullname: fullName)
                         }
                     } label: {
                         Text("Registrar")
@@ -125,17 +114,18 @@ struct RegistrationView: View {
                     }
                     .disabled(!FormIsValid)
                     .opacity(FormIsValid ? 1.0 : 0.8)
-
-                    if !errorMessageUserExists.isEmpty && viewModel.userExists {
-                        Text(errorMessageUserExists)
+                    
+                    
+                    if !viewModel.errorMessageUserExists.isEmpty {
+                        Text(viewModel.errorMessageUserExists)
                             .frame(width: geometry.size.width * 0.8, alignment: .leading)
                             .foregroundColor(.red)
                             .font(.subheadline)
                             .padding(.top, 8)
                     }
-
+                    
                     Spacer()
-
+                    
                     // Sign In button
                     Button {
                         dismiss()

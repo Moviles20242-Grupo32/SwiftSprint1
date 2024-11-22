@@ -474,6 +474,10 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         DatabaseManager.shared.saveRecentSearchFilterUse()
     }
     
+    func saveTrackOrderFeatureUse(){
+        DatabaseManager.shared.saveTrackOrderFeatureUse()
+    }
+    
     
     // function to clean items and the favorite Cache.
     func cleanItems(){

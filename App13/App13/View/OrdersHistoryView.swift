@@ -107,6 +107,7 @@ struct OrdersHistoryView: View {
                                     
                                     NavigationLink(destination: {
                                         TrackOrderView()
+                                            .onAppear{HomeModel.saveTrackOrderFeatureUse()}
                                     }, label: {
                                         Text("Ver en el mapa")
                                             .font(.caption)
@@ -131,7 +132,7 @@ struct OrdersHistoryView: View {
 }
 
 
- #Preview {
- OrdersHistoryView()
- }
+// #Preview {
+// OrdersHistoryView()
+// }
 
