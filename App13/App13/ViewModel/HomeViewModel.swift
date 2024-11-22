@@ -234,8 +234,6 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
         
     }
     
-    
-    
     func getIndex(item: Item, isCartIndex: Bool)->Int{
         
         let index = self.items.firstIndex{ (item1)->Bool in
