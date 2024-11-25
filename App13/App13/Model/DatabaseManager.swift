@@ -153,7 +153,33 @@ class DatabaseManager: ObservableObject {
             throw error
         }
     }
+    
+    func fetchUserByEmail(email: String) async throws -> User? {
+        do {
+            // Query the "users" collection where the "email" field matches the given email
+            let querySnapshot = try await db.collection("users")
+                .whereField("email", isEqualTo: email)
+                .getDocuments()
 
+            // Check if there are any documents that match the query
+            if let document = querySnapshot.documents.first {
+                // Log the raw data returned from Firestore
+                let data = document.data()
+                print("DEBUG: Fetched user data by email: \(String(describing: data))")
+                
+                // Attempt to decode the document into the User object
+                return try document.data(as: User.self)
+            } else {
+                // If no document matches the email
+                print("DEBUG: No user found with email: \(email)")
+                return nil
+            }
+        } catch {
+            // Log any errors that occur during the fetching or decoding
+            print("DEBUG: Error fetching user by email: \(error)")
+            throw error
+        }
+    }
 
     // Async method to create a new user in the "users" collection
     func createUser(user: User) async throws {
@@ -248,6 +274,22 @@ class DatabaseManager: ObservableObject {
         }
     }
     
+    //  In the last month, what percentage of users used the track the order feature ? Type 3 Juan
+    func saveTrackOrderFeatureUse(){
+        let timestamp = Timestamp()
+        let data: [String: Any] = [
+            "timestamp": timestamp,
+            "userId": currentUser?.id as Any
+        ]
+
+        db.collection("trackOrderFeatureUse").addDocument(data: data) { error in
+            if let error = error {
+                print("Error saving star filter use: \(error)")
+            } else {
+                print("track Order Feature Use successfully saved!")
+            }
+        }
+    }
     
     func saveCloseFoodies() {
         let timestamp = Timestamp()
