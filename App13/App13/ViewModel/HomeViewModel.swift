@@ -463,6 +463,7 @@ class HomeViewModel: NSObject,ObservableObject,CLLocationManagerDelegate{
     func clearCart() {
         cleanItems()
         cartItems.removeAll()
+        activeOrders.removeAll()
         CacheManager.shared.clearCartCache()
     }
     
