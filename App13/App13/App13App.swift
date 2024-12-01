@@ -93,10 +93,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 
     func sendNoOrderNotification() {
-        
-        print("order")
+
         if !(AuthViewModel.shared.HomeModel.cartItems.isEmpty){
-            print("order2")
+            DatabaseManager.shared.saveNoOrderNotfication()
             let content = UNMutableNotificationContent()
             content.title = "Orden incompleta"
             content.body = "Finaliza tu orden!"

@@ -306,5 +306,21 @@ class DatabaseManager: ObservableObject {
             }
         }
     }
+    
+    func saveNoOrderNotfication() {
+        let timestamp = Timestamp()
+        let data: [String: Any] = [
+            "timestamp": timestamp,
+            "id": currentUser?.id as Any
+        ]
+
+        db.collection("NoOrderNotfication").addDocument(data: data) { error in
+            if let error = error {
+                print("Error saving star filter use: \(error)")
+            } else {
+                print("Star filter use successfully saved!")
+            }
+        }
+    }
 
 }
